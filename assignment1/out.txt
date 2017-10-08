@@ -1,0 +1,45 @@
+---------------------
+EuroRoad
+MEDIDAS
+Número de vértices:  1039
+Grau médio: 2.5120
+Segundo momento da distribuição do grau: 7.7536
+Média do coef. de aglomeração local: 0.0189
+Transitividade: 0.0353
+Média dos menores caminhos: 18.3951
+Diâmetro: 62.0000
+Entropia de Shannon: 8329.9785
+---------------------
+Hamster
+MEDIDAS
+Número de vértices:  1788
+Grau médio: 13.9553
+Segundo momento da distribuição do grau: 635.6063
+Média do coef. de aglomeração local: 0.1433
+Transitividade: 0.0904
+Média dos menores caminhos: 3.4526
+Diâmetro: 14.0000
+Entropia de Shannon: 10435.1672
+---------------------
+Powergrid
+MEDIDAS
+Número de vértices:  4941
+Grau médio: 2.6691
+Segundo momento da distribuição do grau: 10.3327
+Média do coef. de aglomeração local: 0.0801
+Transitividade: 0.1032
+Média dos menores caminhos: 18.9892
+Diâmetro: 46.0000
+Entropia de Shannon: 48497.6947
+---------------------
+Airports
+MEDIDAS
+Número de vértices:  1572
+Grau médio: 21.9008
+Segundo momento da distribuição do grau: 2457.8944
+Média do coef. de aglomeração local: 0.5048
+Transitividade: 0.3841
+Média dos menores caminhos: 3.1152
+Diâmetro: 8.0000
+Entropia de Shannon: 8848.7055
+---------------------

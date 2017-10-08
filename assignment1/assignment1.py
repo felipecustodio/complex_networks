@@ -16,6 +16,8 @@ Assignment 1 - Complex Networks caracterization
 
 import networkx as nx
 import numpy as np
+import math
+import sys
 import powerlaw
 from matplotlib import pyplot as pl
 
@@ -69,10 +71,20 @@ def is_scale_free(graph):
 
 
 def centralities(graph):
+    # medidas de centralidade
     betweenness_centrality = nx.betweenness_centrality(graph)
     closeness_centrality = nx.closeness_centrality(graph)
     eigenvector_centrality = nx.eigenvector_centrality(graph)
     pagerank = nx.pagerank(graph)
+
+
+def entropy(graph):
+    entropy = 0
+    distribution = degree_distribution(graph)
+    for value in distribution:
+        if value[1] > 0:
+            entropy += value[1] * math.log2(value[1])
+    return entropy
 
 
 def average_degree(graph):
@@ -83,45 +95,32 @@ def average_degree(graph):
 
 def measures(graph):
     print("MEDIDAS")
-    print("Número de vértices: ", len(graph))
-    print("Grau médio: ", average_degree(graph))
-    print("Segundo momento da distribuição do grau: ", stat_moment(graph, 2))
-    print("Média do coef. de aglomeração local: ", nx.average_clustering(graph))
-    print("Transitividade: ", nx.transitivity(graph))
-    print("Média dos menores caminhos: ", nx.average_shortest_path_length(graph))
-    print("Diâmetro: ", nx.diameter(graph))
+    print("Número de vértices: ",len(graph))
+    print("Grau médio: %.4f" % (average_degree(graph)))
+    print("Segundo momento da distribuição do grau: %.4f" % (stat_moment(graph, 2)))
+    print("Média do coef. de aglomeração local: %.4f" % (nx.average_clustering(graph)))
+    print("Transitividade: %.4f" % (nx.transitivity(graph)))
+    print("Média dos menores caminhos: %.4f" % (nx.average_shortest_path_length(graph)))
+    print("Diâmetro: %.4f" % (nx.diameter(graph)))
 
+def shortest_paths_distribution(graph):
+    pass
 
-def histograms(graphs):
+def shortest_paths_histograms(graphs):
     
     plot = pl.subplot()
-    pl.title("Distribuição dos Menores Caminhos")
+    pl.title("Distribuição dos menores caminhos")
 
-    ## distribuição dos menores caminhos ##
-    
-    # encontrar todos os tamanhos de menores caminhos
     dists = {}
-    lengths = {}
+    # encontrar distribuição
     for graph in graphs:
-        lengths[graph] = (nx.shortest_path_length(graph))
-        # encontrar a distribuição dos tamanhos para o grafo atual
-        distribution = {}
-        for length in lengths[graph]:
-            if length not in distribution and int(length) > 0:
-                distribution[length] = 0
-            distribution[length] += 1
-        dist = sorted(distribution.items())
-        # adicionar distribuição do grafo para dicionário
-        dists[graph] = dist
-
-    for item in dists[graph]:
-        print(item[0])
-
+        dists[graph] = shortest_paths_distribution(graph)
+ 
     # plotar distribuições em escala log
-    plot.plot(dists[euroroad], color='#D45C7E', marker='None', label='euroroad')
-    #plot.loglog(dists[hamster], color='#C9533E', marker='None', label='hamster')
-    #plot.loglog(dists[powergrid], color='#45415C', marker='None', label='powergrid')
-    #plot.loglog(dists[airports], color='#DC7B28', marker='None', label='airports')
+    plot.loglog(dists[euroroad], color='#D45C7E', marker='None', label='euroroad')
+    plot.loglog(dists[hamster], color='#C9533E', marker='None', label='hamster')
+    plot.loglog(dists[powergrid], color='#45415C', marker='None', label='powergrid')
+    plot.loglog(dists[airports], color='#DC7B28', marker='None', label='airports')
     
     # configurar visual do gráfico
     plot.spines['right'].set_visible(False)
@@ -129,20 +128,61 @@ def histograms(graphs):
     plot.yaxis.set_ticks_position('left')
     plot.xaxis.set_ticks_position('bottom')
     
-    pl.xlabel('tamanho do menor caminho')
+    pl.xlabel('distância')
     pl.ylabel('frequência')
 
     pl.legend(loc='upper right')
     pl.subplots_adjust(hspace=0.5)
     
-    # exibir
+    # exibir e salvar
     pl.show()
+    # pl.savefig("shortest_paths_histograms.png")
+
+
+def clustering_distribution(graph):
+    pass
+
+def clustering_histograms(graphs):
+    plot = pl.subplot()
+    pl.title("Distribuição acumulada do coeficiente de aglomeração local")
+
+    dists = {}
+    # encontrar distribuição
+    for graph in graphs:
+        dists[graph] = clustering_distribution(graph)
+
+    # plotar distribuições em escala log
+    plot.loglog(dists[euroroad], color='#D45C7E', marker='None', label='euroroad')
+    plot.loglog(dists[hamster], color='#C9533E', marker='None', label='hamster')
+    plot.loglog(dists[powergrid], color='#45415C', marker='None', label='powergrid')
+    plot.loglog(dists[airports], color='#DC7B28', marker='None', label='airports')
+
+    # configurar visual do gráfico
+    plot.spines['right'].set_visible(False)
+    plot.spines['top'].set_visible(False)
+    plot.yaxis.set_ticks_position('left')
+    plot.xaxis.set_ticks_position('bottom')
+    
+    pl.xlabel('coeficiente de aglomeração local')
+    pl.ylabel('frequência')
+
+    pl.legend(loc='upper right')
+    pl.subplots_adjust(hspace=0.5)
+    
+    # exibir e salvar
+    pl.show()
+    # pl.savefig("clustering_histograms.png")
 
 
 def pearson(measures):
     pass
     # scatter plots
 
+
+# set python to print to file
+orig_stdout = sys.stdout
+f = open('out.txt', 'w')
+sys.stdout = f
 
 # read networks
 euroroad = read_graph("./networks/euroroad.txt")
@@ -161,24 +201,32 @@ giants = {}
 for graph in graphs:
     giants[graph] = giant_component(graph)
 
-
-histograms(giants)
+# shortest_paths_histograms(giants)
+# clustering_histograms(giants)
 
 # measures
-# print("---------------------")
-# print("EuroRoad")
-# measures(giants[euroroad])
-# print("---------------------")
+print("---------------------")
+print("EuroRoad")
+measures(giants[euroroad])
+print("Entropia de Shannon: %.4f" % (entropy(giants[euroroad])))
+print("---------------------")
 
-# print("Hamster")
-# measures(giants[hamster])
-# print("---------------------")
+print("Hamster")
+measures(giants[hamster])
+print("Entropia de Shannon: %.4f" % (entropy(giants[hamster])))
+print("---------------------")
 
-# print("Powergrid")
-# measures(giants[powergrid])
-# print("---------------------")
+print("Powergrid")
+measures(giants[powergrid])
+print("Entropia de Shannon: %.4f" % (entropy(giants[powergrid])))
+print("---------------------")
 
-# print("Airports")
-# measures(giants[airports])
-# print("---------------------")
+print("Airports")
+measures(giants[airports])
+print("Entropia de Shannon: %.4f" % (entropy(giants[airports])))
+print("---------------------")
 
+
+# close file
+sys.stdout = orig_stdout
+f.close()

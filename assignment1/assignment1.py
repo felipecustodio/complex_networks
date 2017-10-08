@@ -16,7 +16,6 @@ Assignment 1 - Complex Networks caracterization
 
 import networkx as nx
 import numpy as np
-from scipy.interpolate import spline
 import math
 import sys
 import powerlaw
@@ -29,12 +28,12 @@ def read_graph(filename):
         for line in f:
             nodes = line.split()
             graph.add_edge(nodes[0], nodes[1])
+    graph = graph.to_undirected()
     return graph
 
 
 def draw_graph(graph):
     nx.draw(graph)
-    # pl.savefig(filename)
     pl.show()
 
 
@@ -62,7 +61,6 @@ def degree_distribution(graph):
 
 def is_scale_free(graph):
     distribution = np.asarray(degree_distribution(graph))
-    # fit = powerlaw.Fit(distribution)]
     fit = powerlaw.Fit(distribution)
     exponent = fit.power_law.alpha
     if (exponent >= 2 and exponent <= 3):
@@ -83,10 +81,10 @@ def entropy(graph):
     entropy = 0
     distribution = degree_distribution(graph)
     # distribution retorna tuplas grau:frequencia
-    # value[1] = frequencia
-    for value in distribution:
+    for i, value in enumerate(distribution):
         if value[1] > 0:
-            entropy += value[1] * math.log2(value[1])
+            val = (value[1] / graph.number_of_nodes())
+            entropy -= (val) * math.log2(val)
     return entropy
 
 
@@ -106,8 +104,18 @@ def measures(graph):
     print("Média dos menores caminhos: %.4f" % (nx.average_shortest_path_length(graph)))
     print("Diâmetro: %.4f" % (nx.diameter(graph)))
 
+
 def shortest_paths_distribution(graph):
-    return 1
+    print("Finding paths")
+    length = nx.all_pairs_shortest_path_length(graph)
+    print("Donezzo")
+    dist = {}
+    for value in length:
+        if value not in dist:
+            dist[value] = 0
+        dist[value] += 1
+    return list(dist.values())
+
 
 def shortest_paths_histograms(graphs):
     
@@ -118,11 +126,18 @@ def shortest_paths_histograms(graphs):
     # encontrar distribuições
     for graph in graphs:
         dists[graph] = shortest_paths_distribution(graph)
- 
+        # normalizar
+        for i, val in enumerate(dists[graph]):
+            dists[graph][i] = dists[graph][i] / graph.number_of_nodes()
+
     # plotar distribuições em escala log
+    x = np.linspace(0, nx.diameter(graphs[euroroad]) + 1, len(dists[euroroad]))
     plot.loglog(dists[euroroad], color='#D45C7E', marker='None', label='euroroad')
+    x = np.linspace(0, nx.diameter(graphs[hamster]) + 1, len(dists[hamster]))
     plot.loglog(dists[hamster], color='#C9533E', marker='None', label='hamster')
+    x = np.linspace(0, nx.diameter(graphs[powergrid]) + 1, len(dists[powergrid]))
     plot.loglog(dists[powergrid], color='#45415C', marker='None', label='powergrid')
+    x = np.linspace(0, nx.diameter(graphs[airports]) + 1, len(dists[airports]))
     plot.loglog(dists[airports], color='#DC7B28', marker='None', label='airports')
     
     # configurar visual do gráfico
@@ -139,7 +154,6 @@ def shortest_paths_histograms(graphs):
     
     # exibir e salvar
     pl.show()
-    pl.savefig("shortest_paths_histograms.png")
 
 
 def clustering_distribution(graph):
@@ -159,12 +173,20 @@ def clustering_histograms(graphs):
     # encontrar distribuições
     for graph in graphs:
         dists[graph] = clustering_distribution(graph)
+        # normalizar
+        for i, val in enumerate(dists[graph]):
+            dists[graph][i] = dists[graph][i] / graph.number_of_nodes()
+        # fazer distribuição acumulada
+        dists[graph] = np.cumsum(dists[graph])
 
-    # plotar distribuições em escala log
-    plot.loglog(dists[euroroad], color='#D45C7E', marker='None', label='euroroad')
-    plot.loglog(dists[hamster], color='#C9533E', marker='None', label='hamster')
-    plot.loglog(dists[powergrid], color='#45415C', marker='None', label='powergrid')
-    plot.loglog(dists[airports], color='#DC7B28', marker='None', label='airports')
+    x = np.linspace(0, 1, len(dists[euroroad]))
+    plot.plot(x, dists[euroroad], color='#D45C7E',label='euroroad')
+    x = np.linspace(0, 1, len(dists[hamster]))
+    plot.plot(x, dists[hamster], color='#C9533E',label='hamster')
+    x = np.linspace(0, 1, len(dists[powergrid]))
+    plot.plot(x, dists[powergrid], color='#45415C',label='powergrid')
+    x = np.linspace(0, 1, len(dists[airports]))
+    plot.plot(x, dists[airports], color='#DC7B28',label='airports')
 
     # configurar visual do gráfico
     plot.spines['right'].set_visible(False)
@@ -175,12 +197,11 @@ def clustering_histograms(graphs):
     pl.xlabel('coeficiente de aglomeração local')
     pl.ylabel('frequência')
 
-    pl.legend(loc='upper right')
+    pl.legend(loc='lower right')
     pl.subplots_adjust(hspace=0.5)
     
     # exibir e salvar
     pl.show()
-    pl.savefig("clustering_histograms.png")
 
 
 def pearson(measures):

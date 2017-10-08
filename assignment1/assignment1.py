@@ -16,6 +16,7 @@ Assignment 1 - Complex Networks caracterization
 
 import networkx as nx
 import numpy as np
+from scipy.interpolate import spline
 import math
 import sys
 import powerlaw
@@ -81,6 +82,8 @@ def centralities(graph):
 def entropy(graph):
     entropy = 0
     distribution = degree_distribution(graph)
+    # distribution retorna tuplas grau:frequencia
+    # value[1] = frequencia
     for value in distribution:
         if value[1] > 0:
             entropy += value[1] * math.log2(value[1])
@@ -104,7 +107,7 @@ def measures(graph):
     print("Diâmetro: %.4f" % (nx.diameter(graph)))
 
 def shortest_paths_distribution(graph):
-    pass
+    return 1
 
 def shortest_paths_histograms(graphs):
     
@@ -112,7 +115,7 @@ def shortest_paths_histograms(graphs):
     pl.title("Distribuição dos menores caminhos")
 
     dists = {}
-    # encontrar distribuição
+    # encontrar distribuições
     for graph in graphs:
         dists[graph] = shortest_paths_distribution(graph)
  
@@ -136,18 +139,24 @@ def shortest_paths_histograms(graphs):
     
     # exibir e salvar
     pl.show()
-    # pl.savefig("shortest_paths_histograms.png")
+    pl.savefig("shortest_paths_histograms.png")
 
 
 def clustering_distribution(graph):
-    pass
+    coefficients = list((nx.clustering(graph)).values())
+    dist = {}
+    for value in coefficients:
+        if value not in dist:
+            dist[value] = 0
+        dist[value] += 1
+    return list(dist.values())
 
 def clustering_histograms(graphs):
     plot = pl.subplot()
     pl.title("Distribuição acumulada do coeficiente de aglomeração local")
 
     dists = {}
-    # encontrar distribuição
+    # encontrar distribuições
     for graph in graphs:
         dists[graph] = clustering_distribution(graph)
 
@@ -171,7 +180,7 @@ def clustering_histograms(graphs):
     
     # exibir e salvar
     pl.show()
-    # pl.savefig("clustering_histograms.png")
+    pl.savefig("clustering_histograms.png")
 
 
 def pearson(measures):
@@ -179,10 +188,10 @@ def pearson(measures):
     # scatter plots
 
 
-# set python to print to file
-orig_stdout = sys.stdout
-f = open('out.txt', 'w')
-sys.stdout = f
+# # set python to print to file
+# orig_stdout = sys.stdout
+# f = open('out.txt', 'w')
+# sys.stdout = f
 
 # read networks
 euroroad = read_graph("./networks/euroroad.txt")
@@ -201,8 +210,11 @@ giants = {}
 for graph in graphs:
     giants[graph] = giant_component(graph)
 
-# shortest_paths_histograms(giants)
-# clustering_histograms(giants)
+# histograms
+shortest_paths_histograms(giants)
+clustering_histograms(giants)
+
+# scatter
 
 # measures
 print("---------------------")
@@ -228,5 +240,5 @@ print("---------------------")
 
 
 # close file
-sys.stdout = orig_stdout
-f.close()
+# sys.stdout = orig_stdout
+# f.close()

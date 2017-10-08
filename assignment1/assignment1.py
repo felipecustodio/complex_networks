@@ -19,6 +19,7 @@ import numpy as np
 import powerlaw
 from matplotlib import pyplot as pl
 
+
 def read_graph(filename):
     graph = nx.Graph()
     with open(filename, 'rb') as f:
@@ -74,8 +75,6 @@ def centralities(graph):
     pagerank = nx.pagerank(graph)
 
 
-
-
 def average_degree(graph):
     degrees = graph.degree().values()
     average = sum(degrees)/len(degrees)
@@ -94,44 +93,55 @@ def measures(graph):
 
 
 def histograms(graphs):
-    # distribuição dos menores caminhos
     
-    # encontrar todos os menores caminhos para todos os grafos
-    paths = []
+    plot = pl.subplot()
+    pl.title("Distribuição dos Menores Caminhos")
+
+    ## distribuição dos menores caminhos ##
+    
+    # encontrar todos os tamanhos de menores caminhos
+    dists = {}
+    lengths = {}
     for graph in graphs:
-        paths.append(nx.shortest_path(graph))
-    
+        lengths[graph] = (nx.shortest_path_length(graph))
+        # encontrar a distribuição dos tamanhos para o grafo atual
+        distribution = {}
+        for length in lengths[graph]:
+            if length not in distribution and int(length) > 0:
+                distribution[length] = 0
+            distribution[length] += 1
+        dist = sorted(distribution.items())
+        # adicionar distribuição do grafo para dicionário
+        dists[graph] = dist
+
+    for item in dists[graph]:
+        print(item[0])
+
     # plotar distribuições em escala log
-    plot = plt.subplot()
-    graph.loglog(paths[0], color='#D45C7E', marker='None', label='euroroad')
-    graph.loglog(paths[1], color='#C9533E', marker='None', label='hamster')
-    graph.loglog(paths[2], color='#45415C', marker='None', label='powergrid')
-    graph.loglog(paths[3], color='#DC7B28', marker='None', label='airports')
+    plot.plot(dists[euroroad], color='#D45C7E', marker='None', label='euroroad')
+    #plot.loglog(dists[hamster], color='#C9533E', marker='None', label='hamster')
+    #plot.loglog(dists[powergrid], color='#45415C', marker='None', label='powergrid')
+    #plot.loglog(dists[airports], color='#DC7B28', marker='None', label='airports')
     
     # configurar visual do gráfico
-    graph.spines['right'].set_visible(False)
-    graph.spines['top'].set_visible(False)
-    graph.yaxis.set_ticks_position('left')
-    graph.xaxis.set_ticks_position('bottom')
-    plt.legend()
-    plt.subplots_adjust(hspace=0.5)
+    plot.spines['right'].set_visible(False)
+    plot.spines['top'].set_visible(False)
+    plot.yaxis.set_ticks_position('left')
+    plot.xaxis.set_ticks_position('bottom')
+    
+    pl.xlabel('tamanho do menor caminho')
+    pl.ylabel('frequência')
+
+    pl.legend(loc='upper right')
+    pl.subplots_adjust(hspace=0.5)
     
     # exibir
-    plt.show()
-
-
-
-
-
+    pl.show()
 
 
 def pearson(measures):
     pass
     # scatter plots
-
-
-def process_graph(graph):
-    pass
 
 
 # read networks

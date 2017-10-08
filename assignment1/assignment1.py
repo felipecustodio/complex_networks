@@ -106,9 +106,7 @@ def measures(graph):
 
 
 def shortest_paths_distribution(graph):
-    print("Finding paths")
     length = nx.all_pairs_shortest_path_length(graph)
-    print("Donezzo")
     dist = {}
     for value in length:
         if value not in dist:
@@ -132,13 +130,13 @@ def shortest_paths_histograms(graphs):
 
     # plotar distribuições em escala log
     x = np.linspace(0, nx.diameter(graphs[euroroad]) + 1, len(dists[euroroad]))
-    plot.loglog(dists[euroroad], color='#D45C7E', marker='None', label='euroroad')
+    plot.plot(x, dists[euroroad], color='#D45C7E', marker='None', label='euroroad')
     x = np.linspace(0, nx.diameter(graphs[hamster]) + 1, len(dists[hamster]))
-    plot.loglog(dists[hamster], color='#C9533E', marker='None', label='hamster')
+    plot.plot(x, dists[hamster], color='#C3392C', marker='None', label='hamster')
     x = np.linspace(0, nx.diameter(graphs[powergrid]) + 1, len(dists[powergrid]))
-    plot.loglog(dists[powergrid], color='#45415C', marker='None', label='powergrid')
+    plot.plot(x, dists[powergrid], color='#45415C', marker='None', label='powergrid')
     x = np.linspace(0, nx.diameter(graphs[airports]) + 1, len(dists[airports]))
-    plot.loglog(dists[airports], color='#DC7B28', marker='None', label='airports')
+    plot.plot(x, dists[airports], color='#FFD504', marker='None', label='airports')
     
     # configurar visual do gráfico
     plot.spines['right'].set_visible(False)
@@ -182,11 +180,11 @@ def clustering_histograms(graphs):
     x = np.linspace(0, 1, len(dists[euroroad]))
     plot.plot(x, dists[euroroad], color='#D45C7E',label='euroroad')
     x = np.linspace(0, 1, len(dists[hamster]))
-    plot.plot(x, dists[hamster], color='#C9533E',label='hamster')
+    plot.plot(x, dists[hamster], color='#C3392C',label='hamster')
     x = np.linspace(0, 1, len(dists[powergrid]))
     plot.plot(x, dists[powergrid], color='#45415C',label='powergrid')
     x = np.linspace(0, 1, len(dists[airports]))
-    plot.plot(x, dists[airports], color='#DC7B28',label='airports')
+    plot.plot(x, dists[airports], color='#FFD504',label='airports')
 
     # configurar visual do gráfico
     plot.spines['right'].set_visible(False)
@@ -258,7 +256,6 @@ print("Airports")
 measures(giants[airports])
 print("Entropia de Shannon: %.4f" % (entropy(giants[airports])))
 print("---------------------")
-
 
 # close file
 # sys.stdout = orig_stdout

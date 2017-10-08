@@ -1,4 +1,5 @@
 #!/bin/usr/env python3
+# -*- coding: utf-8 -*-
 
 '''
 Dynamical Processes in Complex Networks
@@ -14,6 +15,7 @@ Assignment 1 - Complex Networks caracterization
 '''
 
 import networkx as nx
+import numpy as np
 import powerlaw
 from matplotlib import pyplot as pl
 
@@ -55,21 +57,23 @@ def degree_distribution(graph):
 
 
 def is_scale_free(graph):
-    distribution = degree_distribution(graph)
+    distribution = np.asarray(degree_distribution(graph))
+    # fit = powerlaw.Fit(distribution)]
     fit = powerlaw.Fit(distribution)
-    exponent = fit.alpha
+    exponent = fit.power_law.alpha
     if (exponent >= 2 and exponent <= 3):
         return True
     else:
         return False
 
 
-def entropy(graph):
-    print("ENTROPIA")
-    print("Betweenness Centrality: ", nx.betweenness_centrality(graph))
-    print("Closeness Centrality: ", nx.closeness_centrality(graph))
-    print("Eigenvector Centrality: ", nx.eigenvector_centrality(graph))
-    print("PageRank: ", nx.pagerank(graph))
+def centralities(graph):
+    betweenness_centrality = nx.betweenness_centrality(graph)
+    closeness_centrality = nx.closeness_centrality(graph)
+    eigenvector_centrality = nx.eigenvector_centrality(graph)
+    pagerank = nx.pagerank(graph)
+
+
 
 
 def average_degree(graph):
@@ -90,7 +94,34 @@ def measures(graph):
 
 
 def histograms(graphs):
-    pl.title('Distribuição acumulada do coeficiente de aglomeração local')
+    # distribuição dos menores caminhos
+    
+    # encontrar todos os menores caminhos para todos os grafos
+    paths = []
+    for graph in graphs:
+        paths.append(nx.shortest_path(graph))
+    
+    # plotar distribuições em escala log
+    plot = plt.subplot()
+    graph.loglog(paths[0], color='#D45C7E', marker='None', label='euroroad')
+    graph.loglog(paths[1], color='#C9533E', marker='None', label='hamster')
+    graph.loglog(paths[2], color='#45415C', marker='None', label='powergrid')
+    graph.loglog(paths[3], color='#DC7B28', marker='None', label='airports')
+    
+    # configurar visual do gráfico
+    graph.spines['right'].set_visible(False)
+    graph.spines['top'].set_visible(False)
+    graph.yaxis.set_ticks_position('left')
+    graph.xaxis.set_ticks_position('bottom')
+    plt.legend()
+    plt.subplots_adjust(hspace=0.5)
+    
+    # exibir
+    plt.show()
+
+
+
+
 
 
 
@@ -120,20 +151,24 @@ giants = {}
 for graph in graphs:
     giants[graph] = giant_component(graph)
 
+
+histograms(giants)
+
 # measures
-print("EuroRoad")
-measures(giants[euroroad])
-print("-------")
+# print("---------------------")
+# print("EuroRoad")
+# measures(giants[euroroad])
+# print("---------------------")
 
-print("Hamster")
-measures(giants[hamster])
-print("-------")
+# print("Hamster")
+# measures(giants[hamster])
+# print("---------------------")
 
-print("Powergrid")
-measures(giants[powergrid])
-print("-------")
+# print("Powergrid")
+# measures(giants[powergrid])
+# print("---------------------")
 
-print("Airports")
-measures(giants[airports])
-print("-------")
+# print("Airports")
+# measures(giants[airports])
+# print("---------------------")
 

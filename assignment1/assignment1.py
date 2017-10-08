@@ -102,7 +102,7 @@ def measures(graph):
     print("Média do coef. de aglomeração local: %.4f" % (nx.average_clustering(graph)))
     print("Transitividade: %.4f" % (nx.transitivity(graph)))
     print("Média dos menores caminhos: %.4f" % (nx.average_shortest_path_length(graph)))
-    print("Diâmetro: %.4f" % (nx.diameter(graph)))
+    print("Diâmetro: %.1f" % (nx.diameter(graph)))
 
 
 def shortest_paths_distribution(graph):

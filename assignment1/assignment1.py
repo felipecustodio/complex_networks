@@ -55,35 +55,95 @@ def degree_distribution(graph):
         if degree not in degrees:
             degrees[degree] = 0
         degrees[degree] += 1
-    distribution = sorted(degrees.items())
+    distribution = sorted(degrees.values())
     return distribution
 
 
 def is_scale_free(graph):
-    distribution = np.asarray(degree_distribution(graph))
+
+    distribution = degree_distribution(graph)
+    distribution = [x for x in distribution if x != 0]
+
+    np.seterr(divide='ignore', invalid='ignore')
     fit = powerlaw.Fit(distribution)
-    exponent = fit.power_law.alpha
-    if (exponent >= 2 and exponent <= 3):
-        return True
+    coefficient = fit.power_law.alpha
+
+    print("Coeficiente de distribuição de grau: %.4f" % (coefficient))
+    if (coefficient >= 2 and coefficient <= 3):
+        print("Rede livre de escala")
     else:
-        return False
+        print("Rede não é livre de escala")
 
 
-def centralities(graph):
-    # medidas de centralidade
-    betweenness_centrality = nx.betweenness_centrality(graph)
-    closeness_centrality = nx.closeness_centrality(graph)
-    eigenvector_centrality = nx.eigenvector_centrality(graph)
-    pagerank = nx.pagerank(graph)
+def centrality_distribution(centrality):
+    dists = {}
+    for value in centrality.values():
+        if value not in dists:
+            dists[value] = 0
+        dists[value] += 1
+    return list(dists.values())
+
+
+def centralities_histogram(graphs):
+    i = 0
+    # configurar gráfico
+    for graph in graphs:
+        fig, ((ax0, ax1), (ax2, ax3))  = pl.subplots(2, 2)  
+        if (i == 0):
+            ax0.set_title("Euroroad\nDistribuição das medidas de centralidade\n")
+        if (i == 1):
+            ax0.set_title("Hamster\nDistribuição das medidas de centralidade\n")
+        if (i == 2):
+            ax0.set_title("Powergrid\nDistribuição das medidas de centralidade\n")
+        if (i == 3):   
+            ax0.set_title("Airports\nDistribuição das medidas de centralidade\n")
+        
+        # medidas de centralidade
+        betweenness_centrality = centrality_distribution(nx.betweenness_centrality(graph))
+        closeness_centrality = centrality_distribution(nx.closeness_centrality(graph))
+        eigenvector_centrality = centrality_distribution(nx.eigenvector_centrality(graph, max_iter=1000))
+        pagerank = centrality_distribution(nx.pagerank(graph))
+
+        # normalizar
+        betweenness_centrality = [x/max(betweenness_centrality) for x in betweenness_centrality]
+        closeness_centrality = [x/max(closeness_centrality) for x in closeness_centrality]
+        eigenvector_centrality = [x/max(eigenvector_centrality) for x in eigenvector_centrality]
+        pagerank = [x/max(pagerank) for x in pagerank]
+        
+        # plotar distribuições
+        ax0.plot(betweenness_centrality, color='#FF7676', marker='None')
+        ax0.set_xlabel('Betweenness Centrality')
+        ax1.plot(closeness_centrality, color='#F6F49D', marker='None')
+        ax1.set_xlabel('Closeness Centrality')
+        ax2.plot(eigenvector_centrality, color='#5DAE8B', marker='None')
+        ax2.set_xlabel('Eigenvector Centrality')
+        ax3.plot(pagerank, color='#466C95', marker='None')
+        ax3.set_xlabel('PageRank')
+
+        pl.legend(loc='upper right')
+        pl.subplots_adjust(hspace=0.5)
+        pl.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+
+        # exibir e salvar
+        if (i == 0):
+            pl.savefig("euroroad_centralities.png")
+        if (i == 1):
+            pl.savefig("hamster_centralities.png")
+        if (i == 2):
+            pl.savefig("powergrid_centralities.png")
+        if (i == 3):   
+            pl.savefig("airports_centralities.png")
+        pl.show()
+        i += 1
 
 
 def entropy(graph):
     entropy = 0
     distribution = degree_distribution(graph)
-    # distribution retorna tuplas grau:frequencia
-    for i, value in enumerate(distribution):
-        if value[1] > 0:
-            val = (value[1] / graph.number_of_nodes())
+
+    for value in distribution:
+        if value > 0:
+            val = (value / graph.number_of_nodes())
             entropy -= (val) * math.log2(val)
     return entropy
 
@@ -106,13 +166,19 @@ def measures(graph):
 
 
 def shortest_paths_distribution(graph):
-    length = nx.all_pairs_shortest_path_length(graph)
-    dist = {}
-    for value in length:
-        if value not in dist:
-            dist[value] = 0
-        dist[value] += 1
-    return list(dist.values())
+    lengths = nx.shortest_path_length(graph)
+    frequences = {}
+    # pegar todas as distancias entre todos os nós
+    for source, targets in lengths.items():
+        for target in targets:
+            
+            length = lengths[source][target]
+
+            if length not in frequences:
+                frequences[length] = 0
+            frequences[length] += 1
+
+    return list(frequences.values())
 
 
 def shortest_paths_histograms(graphs):
@@ -121,22 +187,24 @@ def shortest_paths_histograms(graphs):
     pl.title("Distribuição dos menores caminhos")
 
     dists = {}
+    current = 0
     # encontrar distribuições
     for graph in graphs:
         dists[graph] = shortest_paths_distribution(graph)
+        print("Found distribution for ", current)
+        current += 1
         # normalizar
-        for i, val in enumerate(dists[graph]):
-            dists[graph][i] = dists[graph][i] / graph.number_of_nodes()
+        dists[graph] = [x/sum(dists[graph]) for x in dists[graph]]
 
-    # plotar distribuições em escala log
+    # plotar distribuições
     x = np.linspace(0, nx.diameter(graphs[euroroad]) + 1, len(dists[euroroad]))
-    plot.plot(x, dists[euroroad], color='#D45C7E', marker='None', label='euroroad')
+    plot.plot(x, dists[euroroad], color='#FF7676', marker='None', label='euroroad')
     x = np.linspace(0, nx.diameter(graphs[hamster]) + 1, len(dists[hamster]))
-    plot.plot(x, dists[hamster], color='#C3392C', marker='None', label='hamster')
+    plot.plot(x, dists[hamster], color='#F6F49D', marker='None', label='hamster')
     x = np.linspace(0, nx.diameter(graphs[powergrid]) + 1, len(dists[powergrid]))
-    plot.plot(x, dists[powergrid], color='#45415C', marker='None', label='powergrid')
+    plot.plot(x, dists[powergrid], color='#5DAE8B', marker='None', label='powergrid')
     x = np.linspace(0, nx.diameter(graphs[airports]) + 1, len(dists[airports]))
-    plot.plot(x, dists[airports], color='#FFD504', marker='None', label='airports')
+    plot.plot(x, dists[airports], color='#466C95', marker='None', label='airports')
     
     # configurar visual do gráfico
     plot.spines['right'].set_visible(False)
@@ -145,7 +213,7 @@ def shortest_paths_histograms(graphs):
     plot.xaxis.set_ticks_position('bottom')
     
     pl.xlabel('distância')
-    pl.ylabel('frequência')
+    pl.ylabel('probabilidade')
 
     pl.legend(loc='upper right')
     pl.subplots_adjust(hspace=0.5)
@@ -163,6 +231,7 @@ def clustering_distribution(graph):
         dist[value] += 1
     return list(dist.values())
 
+
 def clustering_histograms(graphs):
     plot = pl.subplot()
     pl.title("Distribuição acumulada do coeficiente de aglomeração local")
@@ -172,19 +241,18 @@ def clustering_histograms(graphs):
     for graph in graphs:
         dists[graph] = clustering_distribution(graph)
         # normalizar
-        for i, val in enumerate(dists[graph]):
-            dists[graph][i] = dists[graph][i] / graph.number_of_nodes()
+        dists[graph] = [x/sum(dists[graph]) for x in dists[graph]]
         # fazer distribuição acumulada
         dists[graph] = np.cumsum(dists[graph])
 
     x = np.linspace(0, 1, len(dists[euroroad]))
-    plot.plot(x, dists[euroroad], color='#D45C7E',label='euroroad')
+    plot.plot(x, dists[euroroad], color='#FF7676',label='euroroad')
     x = np.linspace(0, 1, len(dists[hamster]))
-    plot.plot(x, dists[hamster], color='#C3392C',label='hamster')
+    plot.plot(x, dists[hamster], color='#F6F49D',label='hamster')
     x = np.linspace(0, 1, len(dists[powergrid]))
-    plot.plot(x, dists[powergrid], color='#45415C',label='powergrid')
+    plot.plot(x, dists[powergrid], color='#5DAE8B',label='powergrid')
     x = np.linspace(0, 1, len(dists[airports]))
-    plot.plot(x, dists[airports], color='#FFD504',label='airports')
+    plot.plot(x, dists[airports], color='#466C95',label='airports')
 
     # configurar visual do gráfico
     plot.spines['right'].set_visible(False)
@@ -193,7 +261,7 @@ def clustering_histograms(graphs):
     plot.xaxis.set_ticks_position('bottom')
     
     pl.xlabel('coeficiente de aglomeração local')
-    pl.ylabel('frequência')
+    pl.ylabel('probabilidade')
 
     pl.legend(loc='lower right')
     pl.subplots_adjust(hspace=0.5)
@@ -202,9 +270,22 @@ def clustering_histograms(graphs):
     pl.show()
 
 
-def pearson(measures):
-    pass
-    # scatter plots
+def pearson(x, y):
+    nx = len(x)
+    ny = len(y)
+
+    sum_x = sum([float(a) for a in x])
+    sum_y = sum([float(b) for b in y])
+
+    sum_xy = sum([a * b for a, b  in zip(x,y)])
+
+    sum_x2 = sum([a ** 2 for a in x])
+    sum_y2 = sum([b ** 2 for b in x])
+
+    top = nx * sum_xy - (sum_x * sum_y)
+    bottom = sqrt((na * sum_x2) - ((sum_x) ** 2)) * sqrt((na * sum_y2) - ((sum_x) ** 2))
+
+    result = (top / bottom)
 
 
 # # set python to print to file
@@ -230,32 +311,37 @@ for graph in graphs:
     giants[graph] = giant_component(graph)
 
 # histograms
-shortest_paths_histograms(giants)
-clustering_histograms(giants)
+# shortest_paths_histograms(giants)
+# clustering_histograms(giants)
+centralities_histogram(giants)
 
 # scatter
 
 # measures
-print("---------------------")
-print("EuroRoad")
-measures(giants[euroroad])
-print("Entropia de Shannon: %.4f" % (entropy(giants[euroroad])))
-print("---------------------")
+# print("---------------------")
+# print("EuroRoad")
+# measures(giants[euroroad])
+# print("Entropia de Shannon: %.4f" % (entropy(giants[euroroad])))
+# is_scale_free(giants[euroroad])
+# print("---------------------")
 
-print("Hamster")
-measures(giants[hamster])
-print("Entropia de Shannon: %.4f" % (entropy(giants[hamster])))
-print("---------------------")
+# print("Hamster")
+# measures(giants[hamster])
+# print("Entropia de Shannon: %.4f" % (entropy(giants[hamster])))
+# is_scale_free(giants[hamster])
+# print("---------------------")
 
-print("Powergrid")
-measures(giants[powergrid])
-print("Entropia de Shannon: %.4f" % (entropy(giants[powergrid])))
-print("---------------------")
+# print("Powergrid")
+# measures(giants[powergrid])
+# print("Entropia de Shannon: %.4f" % (entropy(giants[powergrid])))
+# is_scale_free(giants[powergrid])
+# print("---------------------")
 
-print("Airports")
-measures(giants[airports])
-print("Entropia de Shannon: %.4f" % (entropy(giants[airports])))
-print("---------------------")
+# print("Airports")
+# measures(giants[airports])
+# print("Entropia de Shannon: %.4f" % (entropy(giants[airports])))
+# is_scale_free(giants[airports])
+# print("---------------------")
 
 # close file
 # sys.stdout = orig_stdout

@@ -16,7 +16,7 @@ Assignment 1 - Complex Networks caracterization
 
 import networkx as nx
 import numpy as np
-import math
+from math import sqrt
 import sys
 import powerlaw
 from matplotlib import pyplot as pl
@@ -274,6 +274,9 @@ def pearson(x, y):
     nx = len(x)
     ny = len(y)
 
+    if nx != ny:
+        print("TAMANHOS DIFERENTES")
+
     sum_x = sum([float(a) for a in x])
     sum_y = sum([float(b) for b in y])
 
@@ -283,9 +286,135 @@ def pearson(x, y):
     sum_y2 = sum([b ** 2 for b in x])
 
     top = nx * sum_xy - (sum_x * sum_y)
-    bottom = sqrt((na * sum_x2) - ((sum_x) ** 2)) * sqrt((na * sum_y2) - ((sum_x) ** 2))
 
-    result = (top / bottom)
+    bottom_1 = (nx * sum_x2 - sum_x ** 2) ** .5
+    bottom_2 = (ny * sum_y2 - sum_y ** 2) ** .5
+    result = top / (bottom_1 * bottom_2)
+
+    return result.real
+
+def pearson_scatter(graphs):
+    i = 0
+    for graph in graphs:
+
+        plot = pl.subplot()
+
+        print("Calculando centralidades")
+        # medidas de centralidade
+        betweenness_centrality = list((nx.betweenness_centrality(graph)).values())
+        closeness_centrality = list((nx.closeness_centrality(graph)).values())
+        eigenvector_centrality = list((nx.eigenvector_centrality(graph, max_iter=1000)).values())
+        pagerank = list((nx.pagerank(graph)).values())
+
+        print("Calculando coeficientes de Pearson")
+        
+        c1 = (pearson(betweenness_centrality, closeness_centrality))
+        c2 = (pearson(betweenness_centrality, eigenvector_centrality))
+        c3 = (pearson(betweenness_centrality, pagerank))
+        c4 = (pearson(closeness_centrality, eigenvector_centrality))
+        c5 = (pearson(closeness_centrality, pagerank))
+        c6 = (pearson(eigenvector_centrality, pagerank))
+
+        coefficients = []
+        coefficients.extend((c1,c2,c3,c4,c5,c6))
+        for value in coefficients:
+            if value > 0:
+                print(value)
+
+        print("Ordenar valores")
+        sorted_coefficients = sorted(coefficients)
+
+        # 0 = betweenness
+        # 1 = closeness
+        # 2 = eigenvector
+        # 3 = pagerank
+
+        if (sorted_coefficients[0] == c1):
+            index_a = 0
+            index_b = 1
+        if (sorted_coefficients[0] == c2):
+            index_a = 0
+            index_b = 2
+        if (sorted_coefficients[0] == c3):
+            index_a = 0
+            index_b = 3
+        if (sorted_coefficients[0] == c4):
+            index_a = 1
+            index_b = 2
+        if (sorted_coefficients[0] == c5):
+            index_a = 1
+            index_b = 3
+        if (sorted_coefficients[0] == c6):
+            index_a = 2
+            index_b = 3
+
+        # pegar medidas para serem plotadas e configurar legenda
+        if (index_a == 0):
+            a = betweenness_centrality
+            label_a = "Betweenness Centrality"
+        if (index_a == 1):
+            a = closeness_centrality
+            label_a = "Closeness Centrality"
+        if (index_a == 2):
+            a = eigenvector_centrality
+            label_a = "Eigenvector Centrality"
+        if (index_a == 3):
+            a = pagerank
+            label_a = "PageRank"
+
+        if (index_b == 0):
+            b = betweenness_centrality
+            label_b = "Betweenness Centrality"
+        if (index_b == 1):
+            b = closeness_centrality
+            label_b = "Closeness Centrality"
+        if (index_b == 2):
+            b = eigenvector_centrality
+            label_b = "Eigenvector Centrality"
+        if (index_b == 3):
+            b = pagerank
+            label_b = "PageRank"
+
+        # scatter plot das duas medidas
+        print("Configurando gráfico")
+        # configurar título
+        if (i == 0):
+            pl.title("Euroroad\nMaiores centralidades por coeficiente de Pearson")
+        if (i == 1):
+            pl.title("Hamster\nMaiores centralidades por coeficiente de Pearson")
+        if (i == 2):
+            pl.title("Powergrid\nMaiores centralidades por coeficiente de Pearson")
+        if (i == 3):   
+            pl.title("Airports\nMaiores centralidades por coeficiente de Pearson")
+
+        print("Plotando")
+        # plotar
+        pl.plot(a, color='#FF7676', linestyle='None', marker='o', label=label_a)
+        pl.plot(b, color='#466C95', linestyle='None', marker='o', label=label_b)
+
+        # configurar gráfico
+        pl.legend(loc='upper right')
+        pl.subplots_adjust(hspace=0.5)
+
+        # configurar visual do gráfico
+        plot.spines['right'].set_visible(False)
+        plot.spines['top'].set_visible(False)
+        plot.yaxis.set_ticks_position('left')
+        plot.xaxis.set_ticks_position('bottom')
+
+        # exibir e salvar
+        if (i == 0):
+            pl.savefig("euroroad_pearson.png")
+        if (i == 1):
+            pl.savefig("hamster_pearson.png")
+        if (i == 2):
+            pl.savefig("powergrid_pearson.png")
+        if (i == 3):   
+            pl.savefig("airports_pearson.png")
+        pl.show()
+        i += 1
+
+
 
 
 # # set python to print to file
@@ -313,11 +442,13 @@ for graph in graphs:
 # histograms
 # shortest_paths_histograms(giants)
 # clustering_histograms(giants)
-centralities_histogram(giants)
+# centralities_histogram(giants)
 
-# scatter
+# pearson
+pearson_scatter(giants)
 
 # measures
+
 # print("---------------------")
 # print("EuroRoad")
 # measures(giants[euroroad])

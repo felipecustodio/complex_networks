@@ -21,7 +21,6 @@ import sys
 import powerlaw
 from matplotlib import pyplot as pl
 
-
 def read_graph(filename):
     graph = nx.Graph()
     with open(filename, 'rb') as f:
@@ -163,6 +162,11 @@ def measures(graph):
     print("Transitividade: %.4f" % (nx.transitivity(graph)))
     print("Média dos menores caminhos: %.4f" % (nx.average_shortest_path_length(graph)))
     print("Diâmetro: %.1f" % (nx.diameter(graph)))
+    alpha = (powerlaw.Fit(centrality_distribution(nx.betweenness_centrality(graph)))).alpha
+    if alpha >= 2 and alpha <= 3:
+        print("Betweenness Centrality obedece lei de potência")
+    else:
+        print("Betweenness Centrality não obedece lei de potência")
 
 
 def shortest_paths_distribution(graph):
@@ -219,6 +223,7 @@ def shortest_paths_histograms(graphs):
     pl.subplots_adjust(hspace=0.5)
     
     # exibir e salvar
+    pl.savefig("histograma_caminhos.png")
     pl.show()
 
 
@@ -267,6 +272,7 @@ def clustering_histograms(graphs):
     pl.subplots_adjust(hspace=0.5)
     
     # exibir e salvar
+    pl.savefig("histograma_clustering.png")
     pl.show()
 
 
@@ -299,15 +305,13 @@ def pearson_scatter(graphs):
 
         plot = pl.subplot()
 
-        print("Calculando centralidades")
         # medidas de centralidade
         betweenness_centrality = list((nx.betweenness_centrality(graph)).values())
         closeness_centrality = list((nx.closeness_centrality(graph)).values())
         eigenvector_centrality = list((nx.eigenvector_centrality(graph, max_iter=1000)).values())
         pagerank = list((nx.pagerank(graph)).values())
 
-        print("Calculando coeficientes de Pearson")
-        
+        # coeficientes de pearson
         c1 = (pearson(betweenness_centrality, closeness_centrality))
         c2 = (pearson(betweenness_centrality, eigenvector_centrality))
         c3 = (pearson(betweenness_centrality, pagerank))
@@ -315,36 +319,42 @@ def pearson_scatter(graphs):
         c5 = (pearson(closeness_centrality, pagerank))
         c6 = (pearson(eigenvector_centrality, pagerank))
 
+        print("Betweenness x Closeness", c1)
+        print("Betweenness x Eigenvector", c2)
+        print("Betweenness x Pagerank", c3)
+        print("Closeness x Eigenvector", c4)
+        print("Closeness x Pagerank", c5)
+        print("Eigenvector x Pagerank", c6)
+
+
+        # ordenar
         coefficients = []
         coefficients.extend((c1,c2,c3,c4,c5,c6))
-        for value in coefficients:
-            if value > 0:
-                print(value)
-
-        print("Ordenar valores")
         sorted_coefficients = sorted(coefficients)
 
+        # índices para representar centralidades no gráfico
+        # também conhecido como gambiarra de iniciante em python
         # 0 = betweenness
         # 1 = closeness
         # 2 = eigenvector
         # 3 = pagerank
 
-        if (sorted_coefficients[0] == c1):
+        if (sorted_coefficients[5] == c1):
             index_a = 0
             index_b = 1
-        if (sorted_coefficients[0] == c2):
+        if (sorted_coefficients[5] == c2):
             index_a = 0
             index_b = 2
-        if (sorted_coefficients[0] == c3):
+        if (sorted_coefficients[5] == c3):
             index_a = 0
             index_b = 3
-        if (sorted_coefficients[0] == c4):
+        if (sorted_coefficients[5] == c4):
             index_a = 1
             index_b = 2
-        if (sorted_coefficients[0] == c5):
+        if (sorted_coefficients[5] == c5):
             index_a = 1
             index_b = 3
-        if (sorted_coefficients[0] == c6):
+        if (sorted_coefficients[5] == c6):
             index_a = 2
             index_b = 3
 
@@ -389,12 +399,10 @@ def pearson_scatter(graphs):
 
         print("Plotando")
         # plotar
-        pl.plot(a, color='#FF7676', linestyle='None', marker='o', label=label_a)
-        pl.plot(b, color='#466C95', linestyle='None', marker='o', label=label_b)
-
-        # configurar gráfico
-        pl.legend(loc='upper right')
-        pl.subplots_adjust(hspace=0.5)
+        colors = ['#FF7676', '#F6F49D', '#5DAE8B', '#466C95']
+        pl.ylabel(label_b)
+        pl.xlabel(label_a)
+        pl.scatter(a, b, facecolors=colors[i])
 
         # configurar visual do gráfico
         plot.spines['right'].set_visible(False)
@@ -415,14 +423,7 @@ def pearson_scatter(graphs):
         i += 1
 
 
-
-
-# # set python to print to file
-# orig_stdout = sys.stdout
-# f = open('out.txt', 'w')
-# sys.stdout = f
-
-# read networks
+# ler redes
 euroroad = read_graph("./networks/euroroad.txt")
 hamster = read_graph("./networks/hamster.txt")
 powergrid = read_graph("./networks/us-powergrid.txt")
@@ -434,46 +435,41 @@ graphs.append(hamster)
 graphs.append(powergrid)
 graphs.append(airports)
 
-# get biggest component
+# pegar maior componente
 giants = {}
 for graph in graphs:
     giants[graph] = giant_component(graph)
 
-# histograms
-# shortest_paths_histograms(giants)
-# clustering_histograms(giants)
-# centralities_histogram(giants)
+# histogramas
+shortest_paths_histograms(giants)
+clustering_histograms(giants)
+centralities_histogram(giants)
 
 # pearson
 pearson_scatter(giants)
 
-# measures
+medidas
+print("---------------------")
+print("EuroRoad")
+measures(giants[euroroad])
+print("Entropia de Shannon: %.4f" % (entropy(giants[euroroad])))
+is_scale_free(giants[euroroad])
+print("---------------------")
 
-# print("---------------------")
-# print("EuroRoad")
-# measures(giants[euroroad])
-# print("Entropia de Shannon: %.4f" % (entropy(giants[euroroad])))
-# is_scale_free(giants[euroroad])
-# print("---------------------")
+print("Hamster")
+measures(giants[hamster])
+print("Entropia de Shannon: %.4f" % (entropy(giants[hamster])))
+is_scale_free(giants[hamster])
+print("---------------------")
 
-# print("Hamster")
-# measures(giants[hamster])
-# print("Entropia de Shannon: %.4f" % (entropy(giants[hamster])))
-# is_scale_free(giants[hamster])
-# print("---------------------")
+print("Powergrid")
+measures(giants[powergrid])
+print("Entropia de Shannon: %.4f" % (entropy(giants[powergrid])))
+is_scale_free(giants[powergrid])
+print("---------------------")
 
-# print("Powergrid")
-# measures(giants[powergrid])
-# print("Entropia de Shannon: %.4f" % (entropy(giants[powergrid])))
-# is_scale_free(giants[powergrid])
-# print("---------------------")
-
-# print("Airports")
-# measures(giants[airports])
-# print("Entropia de Shannon: %.4f" % (entropy(giants[airports])))
-# is_scale_free(giants[airports])
-# print("---------------------")
-
-# close file
-# sys.stdout = orig_stdout
-# f.close()
+print("Airports")
+measures(giants[airports])
+print("Entropia de Shannon: %.4f" % (entropy(giants[airports])))
+is_scale_free(giants[airports])
+print("---------------------")

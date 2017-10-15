@@ -1,0 +1,6 @@
+numpy==1.13.3
+powerlaw==1.4.3
+networkx==1.11
+seaborn==0.8.1
+matplotlib==2.0.2
+python_igraph==0.7.1.post6

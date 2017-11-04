@@ -16,38 +16,11 @@ Assignment 2 - Correlation and Communities
 
 import networkx as nx
 import igraph as ig
-import time
 import numpy as np
-import powerlaw
 from matplotlib import pyplot as pp
 import seaborn as sns
 
-'''
-'''
-def giant_component(graph):
-    return nx.Graph(max(nx.connected_component_subgraphs(graph), key=len))
 
-'''
-'''
-def read_graph(filename):
-    graph = nx.Graph()
-    with open(filename, 'rb') as f:
-        for line in f:
-            nodes = line.split()
-            graph.add_edge(nodes[0], nodes[1])
-    graph = graph.to_undirected()
-    return giant_component(graph)
-
-'''
-'''
-def assortativity(graphs):
-	print("ASSORTATIVITY")
-	for name,graph in graphs.items():
-		assortativity = nx.degree_assortativity_coefficient(graph)
-		print("%s = %.4f" % (name, assortativity))
-
-'''
-'''
 def pearson(x, y):
 	# from: https://stackoverflow.com/a/5713856
 	# Assume len(x) == len(y)
@@ -62,8 +35,32 @@ def pearson(x, y):
 	if den == 0: return 0
 	return num / den
 
-'''
-'''
+
+def giant_component(graph):
+    return nx.Graph(max(nx.connected_component_subgraphs(graph), key=len))
+
+
+def read_graph(filename):
+    graph = nx.Graph()
+    with open(filename, 'rb') as f:
+        for line in f:
+            nodes = line.split()
+            graph.add_edge(nodes[0], nodes[1])
+    graph = graph.to_undirected()
+    return giant_component(graph)
+
+
+def nx_to_ig(graph):
+	return ig.Graph.Adjacency((nx.to_numpy_matrix(g) > 0).tolist())
+
+
+def assortativity(graphs):
+	print("ASSORTATIVITY")
+	for name,graph in graphs.items():
+		assortativity = nx.degree_assortativity_coefficient(graph)
+		print("%s = %.4f" % (name, assortativity))
+
+
 def plot_knn(graphs):
 	
 	for name, graph in graphs.items():
@@ -85,16 +82,18 @@ def plot_knn(graphs):
 		pp.show()
 		# pp.savefig(name+"-knn.png")
 
-'''
-'''
+
 def modularities(graph):
 	pass
+
 
 def plot_modularity_evolution():
 	pass
 
+
 def generate_communities():
 	pass
+
 
 # read networks
 graphs = {}
@@ -105,6 +104,6 @@ graphs["Cortical Human"] = read_graph("./networks/cortical-human.txt")
 graphs["Cortical Cat"] = read_graph("./networks/cortical-cat.txt")
 graphs["Cortical Monkey"] = read_graph("./networks/cortical-monkey.txt")
 
-
+# measures
 assortativity(graphs)
 plot_knn(graphs)

@@ -84,7 +84,7 @@ def k_x_knn(graphs):
 		pp.grid(False)
 
 		# pp.savefig(name + "-kxknn.png")
-		pp.savefig('graphs/' + name + "-kxknn.png")
+		pp.savefig('plots/' + name + "-kxknn.png")
 		pp.clf()
 		i += 1
 

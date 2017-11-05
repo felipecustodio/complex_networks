@@ -21,12 +21,14 @@ from itertools import *
 
 import numpy as np
 from matplotlib import pyplot as pp
+from sklearn import preprocessing
 import seaborn as sns
+
 
 from subprocess import call
 
 # plot colors
-colors = ["#1abc9c", "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#e74c3c"]
+colors = ["#1abc9c", "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#e74c3c", "#2c3e50"]
 
 def pearson(x, y):
     n = len(x)
@@ -137,10 +139,11 @@ def communities():
         print("Running for mu = %.1f" % i)
 
         # run package / generate communities
-        call(['./binary_networks/benchmark', '-N', '300', '-k', '8', '-maxk', '30', '-mu', str(i)])
+        call(['./binary_networks/benchmark', '-N', '300', '-k', '10', '-maxk', '30', '-mu', str(i)])
 
         # read generated graph
         g = nx.read_edgelist('./network.dat')
+        g = g.to_undirected()
         # the membership vector should contain the community id of each vertex
         # read generated memberships vector
         memberships = []
@@ -168,27 +171,33 @@ def communities():
         # compare generated membership with the ones generated
         # by the detection algorithms
         print("finding NMIs...")
-        nmi["edge_bet"].append(ig.compare_communities(memberships,detection_edge_bet))
-        nmi["fastgreedy"].append(ig.compare_communities(memberships,detection_fastgreedy))
-        nmi["eigenvector"].append(ig.compare_communities(memberships,detection_eigenvector))
-        nmi["walktrap"].append(ig.compare_communities(memberships,detection_walktrap))
+        nmi["edge_bet"].append(ig.compare_communities(memberships,detection_edge_bet, method='nmi'))
+        nmi["fastgreedy"].append(ig.compare_communities(memberships,detection_fastgreedy, method='nmi'))
+        nmi["eigenvector"].append(ig.compare_communities(memberships,detection_eigenvector, method='nmi'))
+        nmi["walktrap"].append(ig.compare_communities(memberships,detection_walktrap, method='nmi'))
+
+    # normalize nmi
+    # nmi["edge_bet"][:] = [x / max(nmi["edge_bet"]) for x in nmi["edge_bet"]]
+    # nmi["fastgreedy"][:] = [x / max(nmi["fastgreedy"]) for x in nmi["fastgreedy"]]
+    # nmi["eigenvector"][:] = [x / max(nmi["eigenvector"]) for x in nmi["eigenvector"]]
+    # nmi["walktrap"][:] = [x / max(nmi["walktrap"]) for x in nmi["walktrap"]]
 
     # plot
     print("plotting...")
     sns.set()
 
     pp.plot(mu, nmi["edge_bet"], color=colors[0],linestyle='solid', marker='o', label='edge betweenness centrality')
-    pp.plot(mu, nmi["fastgreedy"],color=colors[1], linestyle='solid', marker='o', label='fastgreedy')
-    pp.plot(mu, nmi["eigenvector"],color=colors[3], linestyle='solid', marker='o', label='eigenvetor matrices')
-    pp.plot(mu, nmi["walktrap"],color=colors[5], linestyle='solid', marker='o', label='walktrap')
+    pp.plot(mu, nmi["fastgreedy"],color=colors[3], linestyle='solid', marker='o', label='fastgreedy')
+    pp.plot(mu, nmi["eigenvector"],color=colors[5], linestyle='solid', marker='o', label='eigenvetor matrices')
+    pp.plot(mu, nmi["walktrap"],color=colors[6], linestyle='solid', marker='o', label='walktrap')
 
-    # pp.title("NMI")
+    pp.title("NMI")
     pp.ylabel("NMI")
     pp.xlabel("Mixing parameter µ")        
     pp.legend()
     pp.grid(False)
 
-    pp.savefig('plots/community_detection.png')
+    pp.savefig('plots/nmi.png')
 
 # read networks
 graphs = {}

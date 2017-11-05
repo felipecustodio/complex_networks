@@ -51,20 +51,20 @@ def read_graph(filename):
 
 
 def nx_to_ig(graph):
-	return ig.Graph.Adjacency((nx.to_numpy_matrix(g) > 0).tolist())
+	g = ig.Graph.TupleList(graph.edges(), directed=False)
+	return g
 
 
 def assortativity(graphs):
 	print("ASSORTATIVITY")
 	for name,graph in graphs.items():
 		assortativity = nx.degree_assortativity_coefficient(graph)
-		print("%s = %.4f" % (name, assortativity))
+		print("%s,%.4f" % (name, assortativity))
 
 
-def plot_knn(graphs):
-	
+def k_x_knn(graphs):
+	# plot
 	for name, graph in graphs.items():
-
 		knn = nx.average_degree_connectivity(graph)
 		sns.set()
 
@@ -80,12 +80,35 @@ def plot_knn(graphs):
 		pp.colorbar()
 		pp.grid(False)
 		pp.show()
-		# pp.savefig(name+"-knn.png")
+
+	# correlation
 
 
-def modularities(graph):
-	pass
+def modularities(graphs):
+	print("MODULARITIES")
+	for name, graph in graphs.items():
+		print(name)
+		
+		# convert to igraph
+		g = nx_to_ig(graph)
 
+		# edge betweenness centrality
+		community = g.community_edge_betweenness(directed=False).as_clustering()
+		print("edge betweenness centrality: %.4f" % (community.modularity))
+
+		# fast-greedy
+		community = g.community_fastgreedy().as_clustering()
+		print("fast greedy: %.4f" % (community.modularity))
+
+		# eigenvectors of matrices
+		community = g.community_leading_eigenvector()
+		print("eigenvectors of matrices: %.4f" % (community.modularity))
+
+		# walktrap
+		community = g.community_walktrap().as_clustering()
+		print("walktrap: %.4f" % (community.modularity))
+
+		print("\n")
 
 def plot_modularity_evolution():
 	pass
@@ -105,5 +128,6 @@ graphs["Cortical Cat"] = read_graph("./networks/cortical-cat.txt")
 graphs["Cortical Monkey"] = read_graph("./networks/cortical-monkey.txt")
 
 # measures
-assortativity(graphs)
-plot_knn(graphs)
+# assortativity(graphs)
+# plot_knn(graphs)
+modularities(graphs)

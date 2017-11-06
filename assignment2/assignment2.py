@@ -119,7 +119,6 @@ def modularities(graphs):
 
 
 def plot_modularity_evolution(graphs):
-
     for name, graph in graphs.items():
         print(name)
         #convert
@@ -142,6 +141,7 @@ def plot_modularity_evolution(graphs):
         for i in list_values_y:
             value_y[i] = evolution.as_clustering(n = value_x[i]).modularity
 
+        #reverse
         value_x = value_x[::-1]
 
         #plot
@@ -221,5 +221,6 @@ graphs["Cortical Monkey"] = read_graph("./networks/cortical-monkey.txt")
 # assortativity(graphs)
 # k_x_knn(graphs)
 # modularities(graphs)
-communities()
+plot_modularity_evolution(graphs)
+#communities()
 print("done")

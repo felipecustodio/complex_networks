@@ -21,11 +21,10 @@ from itertools import *
 
 import numpy as np
 from matplotlib import pyplot as pp
-from sklearn import preprocessing
 import seaborn as sns
-
-
 from subprocess import call
+
+from sklearn.metrics import normalized_mutual_info_score
 
 # plot colors
 colors = ["#1abc9c", "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#e74c3c", "#2c3e50"]
@@ -141,8 +140,9 @@ def communities():
         # run package / generate communities
         call(['./binary_networks/benchmark', '-N', '300', '-k', '10', '-maxk', '30', '-mu', str(i)])
 
+        network = open('./network.dat', 'rb')
         # read generated graph
-        g = nx.read_edgelist('./network.dat')
+        g = nx.read_edgelist(network)
         g = g.to_undirected()
         # the membership vector should contain the community id of each vertex
         # read generated memberships vector
@@ -152,44 +152,37 @@ def communities():
             memberships.append(int(line.split()[1])) # append community id 
 
         # apply detection algorithms and get new memberships vectors
-        print("running detection...")
         g = nx_to_ig(g)
-        print("edge_bet")
         # edge betweenness centrality
         detection_edge_bet = g.community_edge_betweenness(directed=False).as_clustering().membership
         # fast-greedy
-        print("fastgreedy")
         detection_fastgreedy = g.community_fastgreedy().as_clustering().membership
         # eigenvectors of matrices
-        print("eigenvector")
         detection_eigenvector = g.community_leading_eigenvector().membership
         # walktrap
-        print("walktrap")
         detection_walktrap = g.community_walktrap().as_clustering().membership
 
         # NMI 
         # compare generated membership with the ones generated
         # by the detection algorithms
-        print("finding NMIs...")
-        nmi["edge_bet"].append(ig.compare_communities(memberships,detection_edge_bet, method='nmi'))
-        nmi["fastgreedy"].append(ig.compare_communities(memberships,detection_fastgreedy, method='nmi'))
-        nmi["eigenvector"].append(ig.compare_communities(memberships,detection_eigenvector, method='nmi'))
-        nmi["walktrap"].append(ig.compare_communities(memberships,detection_walktrap, method='nmi'))
 
-    # normalize nmi
-    # nmi["edge_bet"][:] = [x / max(nmi["edge_bet"]) for x in nmi["edge_bet"]]
-    # nmi["fastgreedy"][:] = [x / max(nmi["fastgreedy"]) for x in nmi["fastgreedy"]]
-    # nmi["eigenvector"][:] = [x / max(nmi["eigenvector"]) for x in nmi["eigenvector"]]
-    # nmi["walktrap"][:] = [x / max(nmi["walktrap"]) for x in nmi["walktrap"]]
+        # nmi["edge_bet"].append(ig.compare_communities(memberships,detection_edge_bet, method='nmi'))
+        # nmi["fastgreedy"].append(ig.compare_communities(memberships,detection_fastgreedy, method='nmi'))
+        # nmi["eigenvector"].append(ig.compare_communities(memberships,detection_eigenvector, method='nmi'))
+        # nmi["walktrap"].append(ig.compare_communities(memberships,detection_walktrap, method='nmi'))
+
+        nmi["edge_bet"].append(normalized_mutual_info_score(memberships, detection_edge_bet))
+        nmi["fastgreedy"].append(normalized_mutual_info_score(memberships, detection_fastgreedy))
+        nmi["eigenvector"].append(normalized_mutual_info_score(memberships, detection_eigenvector))
+        nmi["walktrap"].append(normalized_mutual_info_score(memberships, detection_walktrap))
 
     # plot
-    print("plotting...")
     sns.set()
 
-    pp.plot(mu, nmi["edge_bet"], color=colors[0],linestyle='solid', marker='o', label='edge betweenness centrality')
-    pp.plot(mu, nmi["fastgreedy"],color=colors[3], linestyle='solid', marker='o', label='fastgreedy')
-    pp.plot(mu, nmi["eigenvector"],color=colors[5], linestyle='solid', marker='o', label='eigenvetor matrices')
-    pp.plot(mu, nmi["walktrap"],color=colors[6], linestyle='solid', marker='o', label='walktrap')
+    pp.plot(mu, nmi["edge_bet"], color=colors[0], linestyle='solid', marker='o', label='edge betweenness centrality')
+    pp.plot(mu, nmi["fastgreedy"], color=colors[3], linestyle='solid', marker='o', label='fastgreedy')
+    pp.plot(mu, nmi["eigenvector"], color=colors[5], linestyle='solid', marker='o', label='eigenvetor matrices')
+    pp.plot(mu, nmi["walktrap"], color=colors[6], linestyle='solid', marker='o', label='walktrap')
 
     pp.title("NMI")
     pp.ylabel("NMI")

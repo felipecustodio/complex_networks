@@ -74,31 +74,47 @@ def k_x_knn(graphs):
     for name, graph in graphs.items():
         print(name)
 
-        knn_degrees = nx.average_degree_connectivity(graph)
-        knn_vertex = nx.average_neighbor_degree(graph)
+        degrees = list(graph.degree().values())
+        knn_degrees = list((nx.average_degree_connectivity(graph)).values())
+        knn_vertex = list((nx.average_neighbor_degree(graph)).values())
+        k = range(1, len(knn_degrees) + 1)
 
-        knn_k = list(knn_degrees.values())
-        knn_v = list(knn_vertex.values())
+        # prepare plotting area
+        sns.set()
+        fig = pp.figure()
+        ax1 = fig.add_subplot(111, label="k(x) x knn(x)")
+        ax2 = fig.add_subplot(111, label="knn(k)", frame_on=False)
+
+        # knn(x) - scatter
+        plot1 = ax1.scatter(degrees, knn_vertex, s = 10, color=colors[i], marker='o', label="k(x) x knn(x)")
+        ax1.set_xlabel("k(x)")
+        ax1.set_ylabel("knn(x)")
+        ax1.tick_params(axis='x')
+        ax1.tick_params(axis='y')
+        # knn(k) - line
+        plot2, = ax2.plot(k, knn_degrees, c=colors[i+1], label="knn(k)")
+        ax2.xaxis.tick_top()
+        ax2.yaxis.tick_right()
+        ax2.set_xlabel("k")
+        ax2.set_ylabel("knn(k)")
+        ax2.xaxis.set_label_position('top') 
+        ax2.yaxis.set_label_position('right')   
+        ax2.tick_params(axis='x')
+        ax2.tick_params(axis='y')
 
         # plot
-        sns.set()
-        pp.title("k x knn - %s" % name)
-        pp.ylabel("Knn(K)")
-        pp.xlabel("K")
-       #  pp.scatter(x, y, c=colors[i], s = 100)
-
+        fig.tight_layout()
+        pp.figlegend((plot1, plot2), ('k(x) x knn(x)', 'knn(k)'), loc='lower right')
+        fig.subplots_adjust(top=0.85, bottom=0.15)
+        pp.suptitle("k x knn - %s" % name)
         pp.grid(False)
-        # pp.plot(list(knn_degrees.keys()), list(knn_degrees.values()), c=colors[i+1], label="knn(k)")
-        # pp.scatter(list(knn_degrees.keys()), list(knn_degrees.values()), c=colors[i], s = 100, label="k(x) vs knn(x)")
-      
         
-        pp.legend(loc='lower right')
-        pp.savefig('plots/' + name + "-kxknn.png")
+        pp.savefig('plots/' + name + "-kxknn.png",bbox_inches = 'tight')
         pp.clf()
         i += 1
 
-        # correlation
-        correlation = pearson(graph.degree().values(), knn_degrees.values())
+        # correlation k(x) x knn(x)
+        correlation = pearson(graph.degree().values(), knn_vertex)
         print("pearson correlation coefficient: %.4f" % correlation)
 
 
@@ -231,11 +247,11 @@ graphs["Cortical Monkey"] = read_graph("./networks/cortical-monkey.txt")
 # 1
 # assortativity(graphs)
 # 2
-# k_x_knn(graphs)
+k_x_knn(graphs)
 # 3, 6
 # modularities(graphs)
 # 5
-plot_modularity_evolution(graphs)
+# plot_modularity_evolution(graphs)
 # 7
 # communities()
 print("done")

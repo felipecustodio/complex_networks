@@ -142,8 +142,9 @@ def communities():
 
         network = open('./network.dat', 'rb')
         # read generated graph
-        g = nx.read_edgelist(network)
-        g = g.to_undirected()
+        g = ig.Graph.Read_Edgelist(network, directed=False) 
+        g.delete_vertices(0)
+        g.simplify()
         # the membership vector should contain the community id of each vertex
         # read generated memberships vector
         memberships = []
@@ -152,25 +153,12 @@ def communities():
             memberships.append(int(line.split()[1])) # append community id 
 
         # apply detection algorithms and get new memberships vectors
-        g = nx_to_ig(g)
-        # edge betweenness centrality
         detection_edge_bet = g.community_edge_betweenness(directed=False).as_clustering().membership
-        # fast-greedy
         detection_fastgreedy = g.community_fastgreedy().as_clustering().membership
-        # eigenvectors of matrices
         detection_eigenvector = g.community_leading_eigenvector().membership
-        # walktrap
         detection_walktrap = g.community_walktrap().as_clustering().membership
 
         # NMI 
-        # compare generated membership with the ones generated
-        # by the detection algorithms
-
-        # nmi["edge_bet"].append(ig.compare_communities(memberships,detection_edge_bet, method='nmi'))
-        # nmi["fastgreedy"].append(ig.compare_communities(memberships,detection_fastgreedy, method='nmi'))
-        # nmi["eigenvector"].append(ig.compare_communities(memberships,detection_eigenvector, method='nmi'))
-        # nmi["walktrap"].append(ig.compare_communities(memberships,detection_walktrap, method='nmi'))
-
         nmi["edge_bet"].append(normalized_mutual_info_score(memberships, detection_edge_bet))
         nmi["fastgreedy"].append(normalized_mutual_info_score(memberships, detection_fastgreedy))
         nmi["eigenvector"].append(normalized_mutual_info_score(memberships, detection_eigenvector))
@@ -187,7 +175,7 @@ def communities():
     pp.title("NMI")
     pp.ylabel("NMI")
     pp.xlabel("Mixing parameter µ")        
-    pp.legend()
+    pp.legend(loc='lower left', ncol=1)
     pp.grid(False)
 
     pp.savefig('plots/nmi.png')

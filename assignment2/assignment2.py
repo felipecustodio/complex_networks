@@ -73,27 +73,31 @@ def k_x_knn(graphs):
     i = 0
     for name, graph in graphs.items():
         print(name)
-        knn = nx.average_degree_connectivity(graph)
 
+        knn_degrees = nx.average_degree_connectivity(graph)
+        knn_vertex = nx.average_neig6hbor_degree(graph)
+
+        knn_k = list(knn_degrees.values())
+        knn_v = list(knn_vertex.values())
+
+        # plot
         sns.set()
-        # plot k x knn
-        x = list(knn.keys())
-        y = list(knn.values())
-
         pp.title("k x knn - %s" % name)
         pp.ylabel("Knn(K)")
         pp.xlabel("K")
-        pp.scatter(x, y, c=colors[i], s = 100)
-        
-        pp.grid(False)
 
+        # pp.plot(list(knn_degrees.keys()), list(knn_degrees.values()), c=colors[i+1], label="knn(k)")
+        # pp.scatter(list(knn_degrees.keys()), list(knn_degrees.values()), c=colors[i], s = 100, label="k(x) vs knn(x)")
+      
+        pp.grid(False)
+        pp.legend(loc='lower right')
         pp.savefig('plots/' + name + "-kxknn.png")
         pp.clf()
         i += 1
 
         # correlation
-        correlation = pearson(graph.degree().values(), knn.values())
-        print("correlation: %.4f" % correlation)
+        correlation = pearson(graph.degree().values(), knn_degrees.values())
+        print("pearson correlation coefficient: %.4f" % correlation)
 
 
 def modularities(graphs):
@@ -189,9 +193,12 @@ graphs["Cortical Human"] = read_graph("./networks/cortical-human.txt")
 graphs["Cortical Cat"] = read_graph("./networks/cortical-cat.txt")
 graphs["Cortical Monkey"] = read_graph("./networks/cortical-monkey.txt")
 
-# measures
+# 1
 # assortativity(graphs)
-# k_x_knn(graphs)
+# 2
+k_x_knn(graphs)
+# 3, 6
 # modularities(graphs)
-communities()
+# 7
+# communities()
 print("done")

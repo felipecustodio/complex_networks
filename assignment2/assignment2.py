@@ -6,7 +6,7 @@ Dynamical Processes in Complex Networks
 University of Sao Paulo
 Professor Francisco Aparecido Rodrigues
 
-Students: 
+Students:
 Felipe Scrochio Custódio - 9442688
 Gabriel Henrique Scalici - 9292970
 
@@ -75,7 +75,7 @@ def k_x_knn(graphs):
         print(name)
 
         knn_degrees = nx.average_degree_connectivity(graph)
-        knn_vertex = nx.average_neig6hbor_degree(graph)
+        knn_vertex = nx.average_neighbor_degree(graph)
 
         knn_k = list(knn_degrees.values())
         knn_v = list(knn_vertex.values())
@@ -85,11 +85,13 @@ def k_x_knn(graphs):
         pp.title("k x knn - %s" % name)
         pp.ylabel("Knn(K)")
         pp.xlabel("K")
+       #  pp.scatter(x, y, c=colors[i], s = 100)
 
+        pp.grid(False)
         # pp.plot(list(knn_degrees.keys()), list(knn_degrees.values()), c=colors[i+1], label="knn(k)")
         # pp.scatter(list(knn_degrees.keys()), list(knn_degrees.values()), c=colors[i], s = 100, label="k(x) vs knn(x)")
       
-        pp.grid(False)
+        
         pp.legend(loc='lower right')
         pp.savefig('plots/' + name + "-kxknn.png")
         pp.clf()
@@ -102,9 +104,9 @@ def k_x_knn(graphs):
 
 def modularities(graphs):
     print("MODULARITIES")
-    
+
     for name, graph in graphs.items():
-        print(name)    
+        print(name)
         # convert to igraph
         g = nx_to_ig(graph)
         # edge betweenness centrality
@@ -122,8 +124,41 @@ def modularities(graphs):
         print("\n")
 
 
-def plot_modularity_evolution():
-    pass
+def plot_modularity_evolution(graphs):
+    for name, graph in graphs.items():
+        print(name)
+        #convert
+        g = nx_to_ig(graph)
+
+        #fast-greedy
+        evolution = g.community_fastgreedy()
+        count = evolution.optimal_count
+
+        #aux
+        count = count - 1
+        tam = len(g.vs)
+
+        #axis
+        value_x = range(tam, count, -1)
+        value_y = np.zeros(len(value_x))
+
+
+        list_values_y = range(len(value_y))
+        for i in list_values_y:
+            value_y[i] = evolution.as_clustering(n = value_x[i]).modularity
+
+        #reverse
+        value_x = value_x[::-1]
+
+        #plot
+        sns.set()
+        pp.plot(value_x, value_y, color=colors[0], marker='o')
+        pp.title("Modularity Evolution - " + name)
+        pp.grid(False)
+        pp.ylabel("Modularity")
+        pp.xlabel("Step")
+        pp.savefig('plots/' + name + '-mod_evolution.png')
+        pp.clf()
 
 
 def communities():
@@ -146,7 +181,7 @@ def communities():
 
         network = open('./network.dat', 'rb')
         # read generated graph
-        g = ig.Graph.Read_Edgelist(network, directed=False) 
+        g = ig.Graph.Read_Edgelist(network, directed=False)
         g.delete_vertices(0)
         g.simplify()
         # the membership vector should contain the community id of each vertex
@@ -154,7 +189,7 @@ def communities():
         memberships = []
         mems = open('./community.dat')
         for line in mems:
-            memberships.append(int(line.split()[1])) # append community id 
+            memberships.append(int(line.split()[1])) # append community id
 
         # apply detection algorithms and get new memberships vectors
         detection_edge_bet = g.community_edge_betweenness(directed=False).as_clustering().membership
@@ -162,7 +197,7 @@ def communities():
         detection_eigenvector = g.community_leading_eigenvector().membership
         detection_walktrap = g.community_walktrap().as_clustering().membership
 
-        # NMI 
+        # NMI
         nmi["edge_bet"].append(normalized_mutual_info_score(memberships, detection_edge_bet))
         nmi["fastgreedy"].append(normalized_mutual_info_score(memberships, detection_fastgreedy))
         nmi["eigenvector"].append(normalized_mutual_info_score(memberships, detection_eigenvector))
@@ -178,7 +213,7 @@ def communities():
 
     pp.title("NMI")
     pp.ylabel("NMI")
-    pp.xlabel("Mixing parameter µ")        
+    pp.xlabel("Mixing parameter µ")
     pp.legend(loc='lower left', ncol=1)
     pp.grid(False)
 
@@ -196,9 +231,11 @@ graphs["Cortical Monkey"] = read_graph("./networks/cortical-monkey.txt")
 # 1
 # assortativity(graphs)
 # 2
-k_x_knn(graphs)
+# k_x_knn(graphs)
 # 3, 6
 # modularities(graphs)
+# 5
+plot_modularity_evolution(graphs)
 # 7
 # communities()
 print("done")

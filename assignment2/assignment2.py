@@ -245,13 +245,13 @@ graphs["Cortical Cat"] = read_graph("./networks/cortical-cat.txt")
 graphs["Cortical Monkey"] = read_graph("./networks/cortical-monkey.txt")
 
 # 1
-# assortativity(graphs)
+assortativity(graphs)
 # 2
 k_x_knn(graphs)
 # 3, 6
-# modularities(graphs)
+modularities(graphs)
 # 5
-# plot_modularity_evolution(graphs)
+plot_modularity_evolution(graphs)
 # 7
-# communities()
+communities()
 print("done")

@@ -1,0 +1,6 @@
+matplotlib==2.0.2
+networkx==1.11
+numpy==1.13.3
+seaborn==0.8.1
+python_igraph==0.7.1.post6
+scikit_learn==0.19.1

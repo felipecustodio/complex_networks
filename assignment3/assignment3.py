@@ -11,7 +11,7 @@ Felipe Scrochio Custódio - 9442688
 Gabriel Henrique Scalici - 9292970
 
 
-Assignment 3 - 
+Assignment 3 - Modelling complex networks, failures and attacks
 '''
 
 import networkx as nx
@@ -21,22 +21,8 @@ import numpy as np
 from matplotlib import pyplot as pp
 import seaborn as sns
 
-
-
 # plot colors
 colors = ["#1abc9c", "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#e74c3c", "#2c3e50"]
-
-def pearson(x, y):
-    n = len(x)
-    sum_x = float(sum(x))
-    sum_y = float(sum(y))
-    sum_x_sq = sum(map(lambda x: pow(x, 2), x))
-    sum_y_sq = sum(map(lambda x: pow(x, 2), y))
-    psum = sum(map(lambda x, y: x * y, x, y))
-    num = psum - (sum_x * sum_y/n)
-    den = pow((sum_x_sq - pow(sum_x, 2) / n) * (sum_y_sq - pow(sum_y, 2) / n), 0.5)
-    if den == 0: return 0
-    return num / den
 
 
 def giant_component(graph):
@@ -58,6 +44,13 @@ def nx_to_ig(graph):
     return g
 
 
-# read networks
-graphs = {}
-graphs["Euroroad"] = read_graph("./networks/euroroad.txt")
+# 1
+
+# 2 
+
+# 3 
+
+# 4 
+
+# 5
+

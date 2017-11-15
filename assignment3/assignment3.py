@@ -96,7 +96,7 @@ def network_models():
     pp.ylabel("Frequency")
     pp.xlabel("Degree (k)")
     pp.grid(False)
-    pp.savefig('plots/erdos-degrees.png')
+    pp.savefig('plots/erdos-degree-dist.png')
     pp.clf()    
 
     pp.title("Watts-Strogatz - Degree Distribution")
@@ -104,7 +104,7 @@ def network_models():
     pp.ylabel("Frequency")
     pp.xlabel("Degree (k)")
     pp.grid(False)
-    pp.savefig('plots/watts-degrees.png')
+    pp.savefig('plots/watts-degree-dist.png')
     pp.clf()
 
     pp.title("Barabási-Albert - Degree Distribution")
@@ -112,7 +112,7 @@ def network_models():
     pp.ylabel("Frequency")
     pp.xlabel("Degree (k)")
     pp.grid(False)
-    pp.savefig('plots/barabasi-degrees.png')
+    pp.savefig('plots/barabasi-degree-dist.png')
     pp.clf()
     print("Done plotting.")
 
@@ -239,14 +239,35 @@ def ER_model():
     pp.clf()    
 
 # 3 
+def WS_model():
+    clusterings = []
+    paths = []
+    # generate WS networks
+    for p in range(0,?): # FIXME
+        network = watts_strogatz_graph(1000, 5, p) # arbitrary values for N and K so far
+        clusterings.append(nx.average_clustering(network))
+        paths.append(nx.average_shortest_path_length(network))
 
+    # plot
+    x = range(0, ?)
+    y1 = clusterings
+    y2 = paths
 
+    # we have to use subplots
 
 # 4 
+def BA_model():
+    # generate 30 networks, do the same as one
+    for power in range(0,?):
+        # generate Barabasi network with p = power
 
 
 
 # 5
+
+
+
+
 
 def main():
     # one()

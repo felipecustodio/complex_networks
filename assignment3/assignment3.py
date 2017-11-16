@@ -67,7 +67,6 @@ def nx_to_ig(graph):
 
 # 1
 def network_models():
-    print("------ 01 ------")
     erdos = []
     watts = []
     barabasi = []
@@ -264,9 +263,72 @@ def BA_model():
 
 
 # 5
+def stress_test():
+    # random removals
+    lens = {}
+    erdos = nx.erdos_renyi_graph()
+    lens["erdos"] = len(erdos)
+    barabasi = nx.barabasi_albert_graph()
+    lens["barabasi"] = len(barabasi)
+ 
+    giant_sizes = {}
+    while (len(erdos) > 0):
+        # remove vertex
+        giant_sizes["erdos"].append(len(giant_component(erdos)))
 
+    while (len(barabasi) > 0):
+        # remove vertex
+        giant_sizes["barabasi"].append(len(giant_component(barabasi)))
 
+    # plot stress test
+    sns.set()
+    pp.plot(lens["erdos"], giants_sizes["erdos"].values(), color=colors[0])
+    pp.xlabel("Number of removals")
+    pp.ylabel("Size of giant component")
+    pp.grid(False)
+    pp.savefig('plots/ER-stress-test.png')
+    pp.clf() 
 
+    sns.set()
+    pp.plot(lens["barabasi"], giants_sizes["barabasi"].values(), color=colors[0])
+    pp.xlabel("Number of removals")
+    pp.ylabel("Size of giant component")
+    pp.grid(False)
+    pp.savefig('plots/BA-stress-test.png')
+    pp.clf() 
+
+    # remove from most connected to least connected
+    lens.clear()
+    erdos = nx.erdos_renyi_graph()
+    lens["erdos"] = len(erdos)
+    barabasi = nx.barabasi_albert_graph()
+    lens["barabasi"] = len(barabasi)
+
+    giant_sizes.clear()
+    while (len(erdos) > 0):
+        # remove vertex
+        giant_sizes["erdos"].append(len(giant_component(erdos)))
+
+    while (len(barabasi) > 0):
+        # remove vertex
+        giant_sizes["barabasi"].append(len(giant_component(barabasi)))
+
+    # plot stress test
+    sns.set()
+    pp.plot(lens["erdos"], giants_sizes["erdos"].values(), color=colors[0])
+    pp.xlabel("Number of removals")
+    pp.ylabel("Size of giant component")
+    pp.grid(False)
+    pp.savefig('plots/ER-stress-test.png')
+    pp.clf() 
+
+    sns.set()
+    pp.plot(lens["barabasi"], giants_sizes["barabasi"].values(), color=colors[0])
+    pp.xlabel("Number of removals")
+    pp.ylabel("Size of giant component")
+    pp.grid(False)
+    pp.savefig('plots/BA-stress-test.png')
+    pp.clf() 
 
 
 def main():

@@ -1,8 +1,9 @@
-# Complex Networks
+<p align="center">
+  <img src="https://media.giphy.com/media/xT4uQF7h39mlsF5czK/giphy.gif"/>
+  <h1 align="center">Complex Networks</h1>
+  <p align="center">College studies on SME0130 - Complex Networks, at ICMC - University of Sao Paulo.</p>
+</p>
 
-![Animation](https://media.giphy.com/media/xT4uQF7h39mlsF5czK/giphy.gif)
-
-College studies on SME0130 - Complex Networks, at ICMC - University of Sao Paulo.
 
 # Assignment 1
 * Complex networks caracterization

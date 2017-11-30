@@ -14,4 +14,7 @@
 # Assignment 3
 * Modelling random complex networks, resistance to failures and attacks
 
+# Assignment 4
+* Epidemic and rumor propagation
+
 ![Network](http://quantifiedself.com/wp-content/uploads/2015/07/Graph4_red_black.png)

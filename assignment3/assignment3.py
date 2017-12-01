@@ -22,6 +22,8 @@ import numpy as np
 from matplotlib import pyplot as pp
 import seaborn as sns
 
+import progressbar
+
 # plot colors
 colors = ["#1abc9c", "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#e74c3c", "#2c3e50"]
 
@@ -77,11 +79,13 @@ def network_models():
     barabasi = []
     # generate 30 networks of each model
     print("Generating networks...")
+    bar = progressbar.ProgressBar(max_value=30)
     for i in range(30):
-        # usando respectivamente os dados do item 1
+        bar.update(i)
         erdos.append(nx.erdos_renyi_graph(500, 0.1))
         watts.append(nx.watts_strogatz_graph(1000, 10, 0.1))
         barabasi.append(nx.barabasi_albert_graph(2000, 10))
+    bar.finish()
 
     # degree distribution (one of each)
     print("Finding degree distributions...")
@@ -156,7 +160,7 @@ def network_models():
     moments["watts"] = []
     moments["barabasi"] = []
 
-    print("Calculating Erdös-Rényi measurements")
+    print("Calculating Erdös-Rényi measurements")    
     for graph in erdos:
         lens["erdos"].append(len(graph))
         degrees["erdos"].append(average_degree(graph))
@@ -250,43 +254,55 @@ def network_models():
     print("Second stat moments = %.4f" % np.std((moments["barabasi"]), ddof=1))
 
 # 2
-# def ER_model():
-#     giants = {}
-#     degrees = range(0,5)
+def ER_model():
+    giants = {}
+    degrees = np.arange(1.0, 5.0, 0.1) # increase degree from 1 to 5 in 0.1 steps
+    # degrees = np.arange(0.0, 1.0, 0.1)
     
-#     print("Finding giant components for different average degrees...")
-#     for p in degrees:
-#         # generate ER networks
-#         current = erdos_renyi_graph(1000, p)
-#         # store size of giant component for current p
-#         giants[p] = len(giant_component(current))
+    print("Finding giant components for different average degrees...")
+    for p in degrees:
+        # generate ER networks
+        current = nx.erdos_renyi_graph(1000, p)
+        # store size of giant component for current p
+        giants[p] = len(giant_component(current))
     
-#     # plot
-#     print("Plotting...")
-#     sns.set()
-#     pp.plot(degrees, giants.values(), color=colors[0])
-#     pp.xlabel("Average degree")
-#     pp.ylabel("Size of giant component")
-#     pp.grid(False)
-#     pp.savefig('plots/ER-evolution.png')
-#     pp.clf()    
+    # plot
+    print("Plotting...")
+    sns.set()
+    pp.plot(degrees, list(giants.values()), color=colors[0])
+    pp.xlabel("Average degree")
+    pp.ylabel("Size of giant component")
+    pp.grid(False)
+    pp.savefig('plots/ER-evolution.png')
+    pp.clf()    
 
-# # 3 
-# def WS_model():
-#     clusterings = []
-#     paths = []
-#     # generate WS networks
-#     for p in range(0,?): # FIXME
-#         network = watts_strogatz_graph(1000, 5, p) # arbitrary values for N and K so far
-#         clusterings.append(nx.average_clustering(network))
-#         paths.append(nx.average_shortest_path_length(network))
+# 3 
+def WS_model():
+    clusterings = []
+    paths = []
 
-#     # plot
-#     x = range(0, ?)
-#     y1 = clusterings
-#     y2 = paths
+    bar = progressbar.ProgressBar(max_value=1)
+    print("Generating WS networks...")
+    # generate WS networks
+    for p in np.arange(0.0, 1.0, 0.001):
+        bar.update(p)
+        network = nx.watts_strogatz_graph(1000, 5, p)
+        clusterings.append(nx.average_clustering(network))
+        paths.append(nx.average_shortest_path_length(network))
+    bar.finish()
 
-#     # we have to use subplots
+    # plot
+    print("Plotting...")
+
+    x = np.arange(0, 1, 0.001)
+    sns.set()
+    pp.plot(x, clusterings, color=colors[0], label="clustering coefficient")
+    pp.plot(x, paths, color=colors[1], label="mean vertex-vertex distance")
+    pp.xlabel("rewiring probability")
+    pp.ylabel("coefficient or distance")
+    pp.grid(False)
+    pp.savefig('plots/WS-evolution.png')
+    pp.clf() 
 
 # # 4 
 # def BA_model():
@@ -365,7 +381,9 @@ def network_models():
 
 
 def main():
-    network_models()
+    # network_models()
+    # ER_model()
+    WS_model()
     print("done")
 
 if __name__ == "__main__":

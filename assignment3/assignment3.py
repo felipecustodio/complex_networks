@@ -13,15 +13,21 @@ Gabriel Henrique Scalici - 9292970
 
 Assignment 3 - Modelling complex networks, failures and attacks
 '''
-import math
 
+# networks
 import networkx as nx
 import igraph as ig
 
+# data processing
 import numpy as np
+from sklearn.preprocessing import normalize
+
+# plotting
 from matplotlib import pyplot as pp
 import seaborn as sns
 
+# tools
+import math
 import progressbar
 
 # plot colors
@@ -160,7 +166,7 @@ def network_models():
     moments["watts"] = []
     moments["barabasi"] = []
 
-    print("Calculating Erdös-Rényi measurements")    
+    print("Calculating Erdös-Rényi measurements...")    
     for graph in erdos:
         lens["erdos"].append(len(graph))
         degrees["erdos"].append(average_degree(graph))
@@ -170,7 +176,7 @@ def network_models():
         entropies["erdos"].append(entropy(graph))
         moments["erdos"].append(stat_moment(graph, 2))
 
-    print("Calculating Watts-Strogatz measurements")
+    print("Calculating Watts-Strogatz measurements...")
     for graph in watts:
         lens["watts"].append(len(graph))
         degrees["watts"].append(average_degree(graph))
@@ -180,7 +186,7 @@ def network_models():
         entropies["watts"].append(entropy(graph))
         moments["watts"].append(stat_moment(graph, 2))
 
-    print("Calculating Barabási-Albert measurements")
+    print("Calculating Barabási-Albert measurements...")
     for graph in barabasi:
         lens["barabasi"].append(len(graph))
         degrees["barabasi"].append(average_degree(graph))
@@ -260,16 +266,24 @@ def ER_model():
     # degrees = np.arange(0.0, 1.0, 0.1)
     
     print("Finding giant components for different average degrees...")
+    bar = progressbar.ProgressBar(max_value=5)
     for p in degrees:
+        bar.update(p)
         # generate ER networks
         current = nx.erdos_renyi_graph(1000, p)
         # store size of giant component for current p
         giants[p] = len(giant_component(current))
+    bar.finish()
     
+    # normalize data
+    y1 = (np.asarray(list(giants.values()))).reshape(1, -1)
+    y1 = normalize(y1, norm='l1', axis=1)
+    x = degrees.reshape(1,-1)
+
     # plot
     print("Plotting...")
     sns.set()
-    pp.plot(degrees, list(giants.values()), color=colors[0])
+    pp.plot(x[0], y1[0], color=colors[6])
     pp.xlabel("Average degree")
     pp.ylabel("Size of giant component")
     pp.grid(False)
@@ -285,22 +299,36 @@ def WS_model():
     print("Generating WS networks...")
     # generate WS networks
     for p in np.arange(0.0, 1.0, 0.001):
-        bar.update(p)
         network = nx.watts_strogatz_graph(1000, 5, p)
         clusterings.append(nx.average_clustering(network))
         paths.append(nx.average_shortest_path_length(network))
+        bar.update(p)
     bar.finish()
 
     # plot
     print("Plotting...")
 
-    x = np.arange(0, 1, 0.001)
+    # list to numpy array
+    y1 = (np.asarray(clusterings)).reshape(1, -1)
+    y2 = (np.asarray(paths)).reshape(1, -1)
+
+    # normalize data
+    y1 = normalize(y1, norm='l1', axis=1)
+    y2 = normalize(y2, norm='l1', axis=1)
+
+    x = (np.arange(0, 1, 0.001)).reshape(1,-1)
+
     sns.set()
-    pp.plot(x, clusterings, color=colors[0], label="clustering coefficient")
-    pp.plot(x, paths, color=colors[1], label="mean vertex-vertex distance")
+    pp.title("Watts-Strogatz - Small World")
+    pp.xscale('log')
+    # pp.yscale('log')
+
+    pp.plot(x[0], y1[0], color=colors[5], label="clustering coefficient")
+    pp.plot(x[0], y2[0], color=colors[6], label="mean vertex-vertex distance")
     pp.xlabel("rewiring probability")
     pp.ylabel("coefficient or distance")
     pp.grid(False)
+    pp.legend()
     pp.savefig('plots/WS-evolution.png')
     pp.clf() 
 
@@ -383,7 +411,7 @@ def WS_model():
 def main():
     # network_models()
     # ER_model()
-    WS_model()
+    # WS_model()
     print("done")
 
 if __name__ == "__main__":

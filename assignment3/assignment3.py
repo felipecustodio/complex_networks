@@ -353,12 +353,15 @@ def BA_model():
 
 
 
-    print("Finding degree distributions...")
-    dists = {}
-    dists["Barabási-Albert (alfa 0.5)"] = degree_distribution(barabasi05[0])
-    dists["Barabási-Albert (alfa 1.0)"] = degree_distribution(barabasi10[0])
-    dists["Barabási-Albert (alfa 1.5)"] = degree_distribution(barabasi15[0])
-    dists["Barabási-Albert (alfa 2.0)"] = degree_distribution(barabasi20[0])
+
+    # print("Finding degree distributions...")
+    # dists = {}
+    # dists["barabasi05"] = degree_distribution(barabasi05[0])
+    # dists["barabasi10"] = degree_distribution(barabasi10[0])
+    # dists["barabasi15"] = degree_distribution(barabasi15[0])
+    # dists["barabasi20"] = degree_distribution(barabasi20[0])
+    #
+
 
 
     # table

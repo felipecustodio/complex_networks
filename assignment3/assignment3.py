@@ -28,7 +28,7 @@ import seaborn as sns
 
 # tools
 import math
-import progressbar
+#import progressbar
 
 # plot colors
 colors = ["#1abc9c", "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#e74c3c", "#2c3e50"]
@@ -76,6 +76,11 @@ def nx_to_ig(graph):
     g = ig.Graph.TupleList(graph.edges(), directed=False)
     return g
 
+def ig_to_nx(graph):
+    A = graph.get_edgelist()
+    g = nx.Graph(A)
+    return g
+
 # assignment functions
 
 # 1
@@ -110,7 +115,7 @@ def network_models():
     pp.xlabel("Degree (k)")
     pp.grid(False)
     pp.savefig('plots/erdos-degree-dist.png')
-    pp.clf()    
+    pp.clf()
 
     pp.title("Watts-Strogatz - Degree Distribution")
     pp.hist(list(watts[0].degree().values()), dists["Watts-Strogatz"], color=colors[1])
@@ -166,7 +171,7 @@ def network_models():
     moments["watts"] = []
     moments["barabasi"] = []
 
-    print("Calculating Erdös-Rényi measurements...")    
+    print("Calculating Erdös-Rényi measurements...")
     for graph in erdos:
         lens["erdos"].append(len(graph))
         degrees["erdos"].append(average_degree(graph))
@@ -264,7 +269,7 @@ def ER_model():
     giants = {}
     degrees = np.arange(1.0, 5.0, 0.1) # increase degree from 1 to 5 in 0.1 steps
     # degrees = np.arange(0.0, 1.0, 0.1)
-    
+
     print("Finding giant components for different average degrees...")
     bar = progressbar.ProgressBar(max_value=5)
     for p in degrees:
@@ -274,7 +279,7 @@ def ER_model():
         # store size of giant component for current p
         giants[p] = len(giant_component(current))
     bar.finish()
-    
+
     # normalize data
     y1 = (np.asarray(list(giants.values()))).reshape(1, -1)
     y1 = normalize(y1, norm='l1', axis=1)
@@ -288,9 +293,9 @@ def ER_model():
     pp.ylabel("Size of giant component")
     pp.grid(False)
     pp.savefig('plots/ER-evolution.png')
-    pp.clf()    
+    pp.clf()
 
-# 3 
+# 3
 def WS_model():
     clusterings = []
     paths = []
@@ -330,13 +335,202 @@ def WS_model():
     pp.grid(False)
     pp.legend()
     pp.savefig('plots/WS-evolution.png')
-    pp.clf() 
+    pp.clf()
 
-# # 4 
-# def BA_model():
-#     # generate 30 networks, do the same as one
-#     for power in range(0,?):
-#         # generate Barabasi network with p = power
+ # 4
+def BA_model():
+    barabasi05 = []
+    barabasi10 = []
+    barabasi15 = []
+    barabasi20 = []
+    # generate 30 networks, do the same as one
+    for i in range(10):
+        #generate Barabasi network with p = power
+        barabasi05.append(ig_to_nx(ig.Graph.Barabasi(500, 10, power=0.5)))
+        barabasi10.append(ig_to_nx(ig.Graph.Barabasi(500, 10, power=1)))
+        barabasi15.append(ig_to_nx(ig.Graph.Barabasi(500, 10, power=1.5)))
+        barabasi20.append(ig_to_nx(ig.Graph.Barabasi(500, 10, power=2)))
+
+
+
+    print("Finding degree distributions...")
+    dists = {}
+    dists["Barabási-Albert (alfa 0.5)"] = degree_distribution(barabasi05[0])
+    dists["Barabási-Albert (alfa 1.0)"] = degree_distribution(barabasi10[0])
+    dists["Barabási-Albert (alfa 1.5)"] = degree_distribution(barabasi15[0])
+    dists["Barabási-Albert (alfa 2.0)"] = degree_distribution(barabasi20[0])
+
+
+    # table
+    print("Taking measures...")
+
+    # degree distribution (one of each)
+
+    lens = {}
+    lens["barabasi05"] = []
+    lens["barabasi10"] = []
+    lens["barabasi15"] = []
+    lens["barabasi20"] = []
+
+    degrees = {}
+    degrees["barabasi05"] = []
+    degrees["barabasi10"] = []
+    degrees["barabasi15"] = []
+    degrees["barabasi20"] = []
+
+    clusterings = {}
+    clusterings["barabasi05"] = []
+    clusterings["barabasi10"] = []
+    clusterings["barabasi15"] = []
+    clusterings["barabasi20"] = []
+
+    assortativities = {}
+    assortativities["barabasi05"] = []
+    assortativities["barabasi10"] = []
+    assortativities["barabasi15"] = []
+    assortativities["barabasi20"] = []
+
+    shortest_paths = {}
+    shortest_paths["barabasi05"] = []
+    shortest_paths["barabasi10"] = []
+    shortest_paths["barabasi15"] = []
+    shortest_paths["barabasi20"] = []
+
+    entropies = {}
+    entropies["barabasi05"] = []
+    entropies["barabasi10"] = []
+    entropies["barabasi15"] = []
+    entropies["barabasi20"] = []
+
+    moments = {}
+    moments["barabasi05"] = []
+    moments["barabasi10"] = []
+    moments["barabasi15"] = []
+    moments["barabasi20"] = []
+
+    print("Calculating Barabási-Albert measurements for alfa = 0.5...")
+    for graph in barabasi05:
+        lens["barabasi05"].append(len(graph))
+        degrees["barabasi05"].append(average_degree(graph))
+        clusterings["barabasi05"].append(nx.average_clustering(graph))
+        assortativities["barabasi05"].append(nx.degree_assortativity_coefficient(graph))
+        shortest_paths["barabasi05"].append(nx.average_shortest_path_length(graph))
+        entropies["barabasi05"].append(entropy(graph))
+        moments["barabasi05"].append(stat_moment(graph, 2))
+
+    print("Calculating Barabási-Albert measurements for alfa = 1.0...")
+    for graph in barabasi10:
+        lens["barabasi10"].append(len(graph))
+        degrees["barabasi10"].append(average_degree(graph))
+        clusterings["barabasi10"].append(nx.average_clustering(graph))
+        assortativities["barabasi10"].append(nx.degree_assortativity_coefficient(graph))
+        shortest_paths["barabasi10"].append(nx.average_shortest_path_length(graph))
+        entropies["barabasi10"].append(entropy(graph))
+        moments["barabasi10"].append(stat_moment(graph, 2))
+
+    print("Calculating Barabási-Albert measurements for alfa = 1.5...")
+    for graph in barabasi15:
+        lens["barabasi15"].append(len(graph))
+        degrees["barabasi15"].append(average_degree(graph))
+        clusterings["barabasi15"].append(nx.average_clustering(graph))
+        assortativities["barabasi15"].append(nx.degree_assortativity_coefficient(graph))
+        shortest_paths["barabasi15"].append(nx.average_shortest_path_length(graph))
+        entropies["barabasi15"].append(entropy(graph))
+        moments["barabasi15"].append(stat_moment(graph, 2))
+
+    print("Calculating Barabási-Albert measurements for alfa = 2.0...")
+    for graph in barabasi20:
+        lens["barabasi20"].append(len(graph))
+        degrees["barabasi20"].append(average_degree(graph))
+        clusterings["barabasi20"].append(nx.average_clustering(graph))
+        assortativities["barabasi20"].append(nx.degree_assortativity_coefficient(graph))
+        shortest_paths["barabasi20"].append(nx.average_shortest_path_length(graph))
+        entropies["barabasi20"].append(entropy(graph))
+        moments["barabasi20"].append(stat_moment(graph, 2))
+
+
+    # median
+    print("Median of Barabasi alfa = 0.5")
+    print("Number of nodes = %d" % np.median((lens["barabasi05"])))
+    print("Degrees = %.4f" % np.median((degrees["barabasi05"])))
+    print("Clustering coefficient = %.4f" % np.median((clusterings["barabasi05"])))
+    print("Assortativity = %.4f" % np.median((assortativities["barabasi05"])))
+    print("Shortest paths = %.4f" % np.median((shortest_paths["barabasi05"])))
+    print("Shannon entropies = %.4f" % np.median((entropies["barabasi05"])))
+    print("Second stat moments = %.4f" % np.median((moments["barabasi05"])))
+
+    # deviation
+    print("Standard Deviation of Barabasi alfa = 0.5")
+    print("Number of nodes = %d" % np.std((lens["barabasi05"]), ddof=1))
+    print("Degrees = %.4f" % np.std((degrees["barabasi05"]), ddof=1))
+    print("Clustering coefficient = %.4f" % np.std((clusterings["barabasi05"]), ddof=1))
+    print("Assortativity = %.4f" % np.std((assortativities["barabasi05"]), ddof=1))
+    print("Shortest paths = %.4f" % np.std((shortest_paths["barabasi05"]), ddof=1))
+    print("Shannon entropies = %.4f" % np.std((entropies["barabasi05"]), ddof=1))
+    print("Second stat moments = %.4f" % np.std((moments["barabasi05"]), ddof=1))
+
+    # median
+    print("Median of Barabasi alfa = 1.0")
+    print("Number of nodes = %d" % np.median((lens["barabasi10"])))
+    print("Degrees = %.4f" % np.median((degrees["barabasi10"])))
+    print("Clustering coefficient = %.4f" % np.median((clusterings["barabasi10"])))
+    print("Assortativity = %.4f" % np.median((assortativities["barabasi10"])))
+    print("Shortest paths = %.4f" % np.median((shortest_paths["barabasi10"])))
+    print("Shannon entropies = %.4f" % np.median((entropies["barabasi10"])))
+    print("Second stat moments = %.4f" % np.median((moments["barabasi10"])))
+
+    # deviation
+    print("Standard Deviation of Barabasi alfa = 1.0")
+    print("Number of nodes = %d" % np.std((lens["barabasi10"]), ddof=1))
+    print("Degrees = %.4f" % np.std((degrees["barabasi10"]), ddof=1))
+    print("Clustering coefficient = %.4f" % np.std((clusterings["barabasi10"]), ddof=1))
+    print("Assortativity = %.4f" % np.std((assortativities["barabasi10"]), ddof=1))
+    print("Shortest paths = %.4f" % np.std((shortest_paths["barabasi10"]), ddof=1))
+    print("Shannon entropies = %.4f" % np.std((entropies["barabasi10"]), ddof=1))
+    print("Second stat moments = %.4f" % np.std((moments["barabasi10"]), ddof=1))
+
+    # median
+    print("Median of Barabasi alfa = 1.5")
+    print("Number of nodes = %d" % np.median((lens["barabasi15"])))
+    print("Degrees = %.4f" % np.median((degrees["barabasi15"])))
+    print("Clustering coefficient = %.4f" % np.median((clusterings["barabasi15"])))
+    print("Assortativity = %.4f" % np.median((assortativities["barabasi15"])))
+    print("Shortest paths = %.4f" % np.median((shortest_paths["barabasi15"])))
+    print("Shannon entropies = %.4f" % np.median((entropies["barabasi15"])))
+    print("Second stat moments = %.4f" % np.median((moments["barabasi15"])))
+
+    # deviation
+    print("Standard Deviation of Barabasi alfa = 1.5")
+    print("Number of nodes = %d" % np.std((lens["barabasi15"]), ddof=1))
+    print("Degrees = %.4f" % np.std((degrees["barabasi15"]), ddof=1))
+    print("Clustering coefficient = %.4f" % np.std((clusterings["barabasi15"]), ddof=1))
+    print("Assortativity = %.4f" % np.std((assortativities["barabasi15"]), ddof=1))
+    print("Shortest paths = %.4f" % np.std((shortest_paths["barabasi15"]), ddof=1))
+    print("Shannon entropies = %.4f" % np.std((entropies["barabasi15"]), ddof=1))
+    print("Second stat moments = %.4f" % np.std((moments["barabasi15"]), ddof=1))
+
+    # median
+    print("Median of Barabasi alfa = 2.0")
+    print("Number of nodes = %d" % np.median((lens["barabasi20"])))
+    print("Degrees = %.4f" % np.median((degrees["barabasi20"])))
+    print("Clustering coefficient = %.4f" % np.median((clusterings["barabasi20"])))
+    print("Assortativity = %.4f" % np.median((assortativities["barabasi20"])))
+    print("Shortest paths = %.4f" % np.median((shortest_paths["barabasi20"])))
+    print("Shannon entropies = %.4f" % np.median((entropies["barabasi20"])))
+    print("Second stat moments = %.4f" % np.median((moments["barabasi20"])))
+
+    # deviation
+    print("Standard Deviation of Barabasi alfa = 2.0")
+    print("Number of nodes = %d" % np.std((lens["barabasi20"]), ddof=1))
+    print("Degrees = %.4f" % np.std((degrees["barabasi20"]), ddof=1))
+    print("Clustering coefficient = %.4f" % np.std((clusterings["barabasi20"]), ddof=1))
+    print("Assortativity = %.4f" % np.std((assortativities["barabasi20"]), ddof=1))
+    print("Shortest paths = %.4f" % np.std((shortest_paths["barabasi20"]), ddof=1))
+    print("Shannon entropies = %.4f" % np.std((entropies["barabasi20"]), ddof=1))
+    print("Second stat moments = %.4f" % np.std((moments["barabasi20"]), ddof=1))
+
+
+
 
 
 # # 5
@@ -347,7 +541,7 @@ def WS_model():
 #     lens["erdos"] = len(erdos)
 #     barabasi = nx.barabasi_albert_graph()
 #     lens["barabasi"] = len(barabasi)
- 
+
 #     giant_sizes = {}
 #     while (len(erdos) > 0):
 #         # remove vertex
@@ -364,7 +558,7 @@ def WS_model():
 #     pp.ylabel("Size of giant component")
 #     pp.grid(False)
 #     pp.savefig('plots/ER-stress-test.png')
-#     pp.clf() 
+#     pp.clf()
 
 #     sns.set()
 #     pp.plot(lens["barabasi"], giants_sizes["barabasi"].values(), color=colors[0])
@@ -372,7 +566,7 @@ def WS_model():
 #     pp.ylabel("Size of giant component")
 #     pp.grid(False)
 #     pp.savefig('plots/BA-stress-test.png')
-#     pp.clf() 
+#     pp.clf()
 
 #     # remove from most connected to least connected
 #     lens.clear()
@@ -397,7 +591,7 @@ def WS_model():
 #     pp.ylabel("Size of giant component")
 #     pp.grid(False)
 #     pp.savefig('plots/ER-stress-test.png')
-#     pp.clf() 
+#     pp.clf()
 
 #     sns.set()
 #     pp.plot(lens["barabasi"], giants_sizes["barabasi"].values(), color=colors[0])
@@ -405,13 +599,14 @@ def WS_model():
 #     pp.ylabel("Size of giant component")
 #     pp.grid(False)
 #     pp.savefig('plots/BA-stress-test.png')
-#     pp.clf() 
+#     pp.clf()
 
 
 def main():
     # network_models()
     # ER_model()
     # WS_model()
+    BA_model()
     print("done")
 
 if __name__ == "__main__":

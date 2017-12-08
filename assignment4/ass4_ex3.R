@@ -6,16 +6,16 @@ library(igraph)
 
 #### MODEL PARAMETERS ####
 N = 1000; #number of nodes
-av.dg = 6; #average degree
+av.dg = 8; #average degree
 m = av.dg/2; # parameter of the BA model
 q = 0.1 # rewiring probability in the WS model
 p = av.dg/N # probability in the ER model
 
 
 #Barabasi network
-G <- barabasi.game(N, m = av.dg/2, directed = FALSE)
+#G <- barabasi.game(N, m = av.dg/2, directed = FALSE)
 #Erdos Networks
-#G <- erdos.renyi.game(N,p, type =c("gnp"))
+G <- erdos.renyi.game(N,p, type =c("gnp"))
 
 #### SIR MODEL ####
 # states: S:0 I:1 R:2
@@ -62,5 +62,5 @@ for(i in targetnodes){
 rhoi = colMeans(Ninf) # average number if infected nodes from the result of each seed node
 t = seq(1,length(rhoi)) # time steps
 
-plot(t, rhoi, xlab = "Time", ylab = "Fraction of infected nodes",
+plot(t, rhoi, xlab = "Time", ylab = "Fraction of infected nodes (Erdos)",
      col = 'red', lwd=2,ylim = c(0,0.2), xlim = c(0,Tmax), pch = 21,  bg = "blue", type="o")

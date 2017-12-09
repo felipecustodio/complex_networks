@@ -9,8 +9,8 @@ rm(list=ls()) #clear all variables
 library(igraph) # Load the igraph package
 
 #### MODEL PARAMETERS ####
-N = 50; #number of nodes
-av.dg = 6; #average degree
+N = 1000; #number of nodes
+av.dg = 8; #average degree
 m = av.dg/2; # parameter of the BA model
 q = 0.1 # rewiring probability in the WS model
 p = av.dg/N # probability in the ER model
@@ -62,7 +62,7 @@ for(i in targetnodes){
           if(vstates[k] == 0){# infect only susceptible nodes
             vstates[k] = 1
           }else{
-            if(runif(1,0,1) <= mu){# if the spreader meets an informed node, it can become stifler.
+            if(runif(1,0,1) <= mu){# if the spreader meets an informed node, it can become stifler .
               vstates[j] = 2
               break
             }
@@ -78,7 +78,5 @@ for(i in targetnodes){
 rhoi = colMeans(Ninf) # average number if infected nodes from the result of each seed node
 t = seq(1,length(rhoi)) # time steps
 
-plot(t, rhoi, xlab = "Time", ylab = "Fraction of infected nodes", 
+plot(t, rhoi, xlab = "Time", ylab = "Fraction of infected nodes",
      col = 'red', lwd=2,ylim = c(0,0.2), xlim = c(0,Tmax), pch = 21,  bg = "blue", type="o")
-
-

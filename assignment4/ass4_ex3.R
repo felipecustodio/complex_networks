@@ -8,7 +8,6 @@ library(igraph)
 N = 1000; #number of nodes
 av.dg = 8; #average degree
 m = av.dg/2; # parameter of the BA model
-q = 0.1 # rewiring probability in the WS model
 p = av.dg/N # probability in the ER model
 
 

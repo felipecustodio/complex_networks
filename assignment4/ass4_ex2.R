@@ -83,9 +83,8 @@ t = seq(1,length(rhoi)) # time steps
 t2 = seq(1,length(vacc)) # time steps
 #Fracao de infectados rhoi/ fracao de recuperados
 
-show = rhoi/vacc
 
-#plot(rhoi, vacc,  xlab="Fraction of vaccinated", ylab="Fraction of infected")
 
+#Plot simple -- fraction infected and immunize
 plot(t2, vacc, xlab = "Time", ylab = "Fraction of infected nodes ER 10% imm hubs",
      col = 'red', lwd=2,ylim = c(0,2), xlim = c(0,Tmax), pch = 21,  bg = "blue", type="o")

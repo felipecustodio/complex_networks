@@ -12,9 +12,9 @@ p = av.dg/N # probability in the ER model
 
 
 #Barabasi network
-#G <- barabasi.game(N, m = av.dg/2, directed = FALSE)
+G <- barabasi.game(N, m = av.dg/2, directed = FALSE)
 #Erdos Networks
-G <- erdos.renyi.game(N,p, type =c("gnp"))
+#G <- erdos.renyi.game(N,p, type =c("gnp"))
 
 #### SIR MODEL ####
 # states: S:0 I:1 R:2
@@ -29,7 +29,7 @@ Ninf = matrix(0,nrow = length(targetnodes), ncol = Tmax) # matrix that stores th
 for(i in targetnodes){
   # is the seed node
   vstates = matrix(0, nrow = N, ncol = 1)
-  print(paste('seed:', i))
+  #print(paste('seed:', i))
   vstates[i] = 1
   vinfected = which(vstates %in% 1)
   t = 1
@@ -54,12 +54,12 @@ for(i in targetnodes){
       }
     }
     Ninf[i, t] = length(which(vstates %in% 1))/N # store the fraction of infected nodes at time t
-    print(paste('t:', t, 'rhoi', length(which(vstates %in% 1))/N))
+    #print(paste('t:', t, 'rhoi', length(which(vstates %in% 1))/N))
     t = t + 1
   }
 }
 rhoi = colMeans(Ninf) # average number if infected nodes from the result of each seed node
 t = seq(1,length(rhoi)) # time steps
 
-plot(t, rhoi, xlab = "Time", ylab = "Fraction of infected nodes (Erdos)",
+plot(t, rhoi, xlab = "Time", ylab = "Fraction of infected nodes BA",
      col = 'red', lwd=2,ylim = c(0,0.2), xlim = c(0,Tmax), pch = 21,  bg = "blue", type="o")

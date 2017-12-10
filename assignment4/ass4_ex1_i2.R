@@ -15,13 +15,13 @@ p = av.dg/N # probability in the ER model
 
 ## MODELS ###
 # BA network
-#G <- barabasi.game(N, m = av.dg/2, directed = FALSE)
+G <- barabasi.game(N, m = av.dg/2, directed = FALSE)
 
 # # ER network
 #G <- erdos.renyi.game(N,p, type =c("gnp"))
 
 # # WS network
-G <- sample_smallworld(dim=1,size=N, nei = av.dg/2, p = q)
+#G <- sample_smallworld(dim=1,size=N, nei = av.dg/2, p = q)
 
 
 #### SIS MODEL ####
@@ -85,6 +85,6 @@ for(lambda in seq(0.01, lambda.max,dlambda)){
 rho = unlist(rho)
 vlambda = unlist(vlambda)
 
-plot(vlambda, rho, xlab = "lambda", ylab = "Fraction of infected nodes WS",
+plot(vlambda, rho, xlab = "lambda", ylab = "Fraction of infected nodes BA",
      col = 'blue', lwd=2, xlim = c(0,lambda.max), pch = 21,  bg = "blue", type="o")
 abline(v=lambda.c, col="red")

@@ -13,11 +13,13 @@ p = av.dg/N # probability in the ER model
 
 ## MODELS ###
 # BA network
-G <- barabasi.game(N, m = av.dg/2, directed = FALSE)
+#G <- barabasi.game(N, m = av.dg/2, directed = FALSE)
 # # ER network
-#G <- erdos.renyi.game(N,p, type =c("gnp"))
+G <- erdos.renyi.game(N,p, type =c("gnp"))
 
+grau = mean(degree(G))
 
+print(paste(grau))
 #### SIR MODEL - RUMOR ####
 # states: S:0 I:1 R:2
 ## Parameters of the SIR model
@@ -27,6 +29,9 @@ beta = 0.4 # probability of transmission
 targetnodes = seq(1,10) # node that will be used as the seed nodes
 Tmax = 20
 Ninf = matrix(0,nrow = length(targetnodes), ncol = Tmax) # matrix that stores the number of infected nodes at each time step
+Nrec = matrix(0,nrow = length(targetnodes), ncol = Tmax)
+
+recs = c()
 
 for(i in targetnodes){
   # is the seed node
@@ -56,14 +61,27 @@ for(i in targetnodes){
       }
     }
     Ninf[i, t] = length(which(vstates %in% 1))/N # store the fraction of infected nodes at time t
+    Nrec[i, t] = length(which(vstates %in% 2))/N # store the fraction of recupered nodes at time t
+
     #print(paste('t:', t, 'rhoi', length(which(vstates %in% 1))/N))
     t = t + 1
   }
+  recs[i] = length(which(vstates %in% 2))/N
 }
-rhoi = colMeans(Ninf) # average number if infected nodes from the result of each seed node
+
+#Plots
+#order = sort(x1, index.return = TRUE)$ix
+
+rhoi = colMeans(Ninf)
+frec = colMeans(Nrec)
 #t = seq(1,length(rhoi)) # time steps
 
-#ARRUMAR SOMENTE QUAL SERA O EIXO X
+rec = mean(recs)
 
-plot(degree_plot, rhoi, xlab = "degree", ylab = "Fraction of infected nodes",
+
+
+
+
+
+plot(grau, rec, xlab = "degree", ylab = "Fraction of infected nodes",
      col = 'red', lwd=2,ylim = c(0,0.2), xlim = c(0,Tmax), pch = 21,  bg = "blue", type="o")

@@ -28,7 +28,8 @@ import seaborn as sns
 
 # tools
 import math
-#import progressbar
+import random
+import progressbar
 
 # plot colors
 colors = ["#1abc9c", "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#e74c3c", "#2c3e50"]
@@ -69,7 +70,6 @@ def entropy(graph):
             val = (value / graph.number_of_nodes())
             entropy -= (val) * math.log2(val)
     return entropy
-
 
 # helper functions
 def nx_to_ig(graph):
@@ -288,8 +288,9 @@ def ER_model():
     # plot
     print("Plotting...")
     sns.set()
-    pp.plot(x[0], y1[0], color=colors[6])
-    pp.xlabel("Average degree")
+    # pp.plot(x[0], y1[0], color=colors[6])
+    pp.plot(x, y1, color=colors[6])
+    pp.xlabel("Connection probability")
     pp.ylabel("Size of giant component")
     pp.grid(False)
     pp.savefig('plots/ER-evolution.png')
@@ -351,23 +352,15 @@ def BA_model():
         barabasi15.append(ig_to_nx(ig.Graph.Barabasi(500, 10, power=1.5)))
         barabasi20.append(ig_to_nx(ig.Graph.Barabasi(500, 10, power=2)))
 
-
-
-
-    # print("Finding degree distributions...")
-    # dists = {}
-    # dists["barabasi05"] = degree_distribution(barabasi05[0])
-    # dists["barabasi10"] = degree_distribution(barabasi10[0])
-    # dists["barabasi15"] = degree_distribution(barabasi15[0])
-    # dists["barabasi20"] = degree_distribution(barabasi20[0])
-    #
-
-
+    print("Finding degree distributions...")
+    dists = {}
+    dists["barabasi05"] = degree_distribution(barabasi05[0])
+    dists["barabasi10"] = degree_distribution(barabasi10[0])
+    dists["barabasi15"] = degree_distribution(barabasi15[0])
+    dists["barabasi20"] = degree_distribution(barabasi20[0])
 
     # table
     print("Taking measures...")
-
-    # degree distribution (one of each)
 
     lens = {}
     lens["barabasi05"] = []
@@ -411,7 +404,6 @@ def BA_model():
     moments["barabasi15"] = []
     moments["barabasi20"] = []
 
-    print("Calculating Barabási-Albert measurements for alfa = 0.5...")
     for graph in barabasi05:
         lens["barabasi05"].append(len(graph))
         degrees["barabasi05"].append(average_degree(graph))
@@ -421,7 +413,6 @@ def BA_model():
         entropies["barabasi05"].append(entropy(graph))
         moments["barabasi05"].append(stat_moment(graph, 2))
 
-    print("Calculating Barabási-Albert measurements for alfa = 1.0...")
     for graph in barabasi10:
         lens["barabasi10"].append(len(graph))
         degrees["barabasi10"].append(average_degree(graph))
@@ -431,7 +422,6 @@ def BA_model():
         entropies["barabasi10"].append(entropy(graph))
         moments["barabasi10"].append(stat_moment(graph, 2))
 
-    print("Calculating Barabási-Albert measurements for alfa = 1.5...")
     for graph in barabasi15:
         lens["barabasi15"].append(len(graph))
         degrees["barabasi15"].append(average_degree(graph))
@@ -441,7 +431,6 @@ def BA_model():
         entropies["barabasi15"].append(entropy(graph))
         moments["barabasi15"].append(stat_moment(graph, 2))
 
-    print("Calculating Barabási-Albert measurements for alfa = 2.0...")
     for graph in barabasi20:
         lens["barabasi20"].append(len(graph))
         degrees["barabasi20"].append(average_degree(graph))
@@ -451,7 +440,7 @@ def BA_model():
         entropies["barabasi20"].append(entropy(graph))
         moments["barabasi20"].append(stat_moment(graph, 2))
 
-
+    print("Calculating Barabási-Albert measurements for alfa = 0.5...")
     # median
     print("Median of Barabasi alfa = 0.5")
     print("Number of nodes = %d" % np.median((lens["barabasi05"])))
@@ -472,6 +461,7 @@ def BA_model():
     print("Shannon entropies = %.4f" % np.std((entropies["barabasi05"]), ddof=1))
     print("Second stat moments = %.4f" % np.std((moments["barabasi05"]), ddof=1))
 
+    print("Calculating Barabási-Albert measurements for alfa = 1.0...")
     # median
     print("Median of Barabasi alfa = 1.0")
     print("Number of nodes = %d" % np.median((lens["barabasi10"])))
@@ -492,6 +482,7 @@ def BA_model():
     print("Shannon entropies = %.4f" % np.std((entropies["barabasi10"]), ddof=1))
     print("Second stat moments = %.4f" % np.std((moments["barabasi10"]), ddof=1))
 
+    print("Calculating Barabási-Albert measurements for alfa = 1.5...")
     # median
     print("Median of Barabasi alfa = 1.5")
     print("Number of nodes = %d" % np.median((lens["barabasi15"])))
@@ -512,6 +503,7 @@ def BA_model():
     print("Shannon entropies = %.4f" % np.std((entropies["barabasi15"]), ddof=1))
     print("Second stat moments = %.4f" % np.std((moments["barabasi15"]), ddof=1))
 
+    print("Calculating Barabási-Albert measurements for alfa = 2.0...")
     # median
     print("Median of Barabasi alfa = 2.0")
     print("Number of nodes = %d" % np.median((lens["barabasi20"])))
@@ -532,84 +524,97 @@ def BA_model():
     print("Shannon entropies = %.4f" % np.std((entropies["barabasi20"]), ddof=1))
     print("Second stat moments = %.4f" % np.std((moments["barabasi20"]), ddof=1))
 
-
-
-
-
 # # 5
-# def stress_test():
-#     # random removals
-#     lens = {}
-#     erdos = nx.erdos_renyi_graph()
-#     lens["erdos"] = len(erdos)
-#     barabasi = nx.barabasi_albert_graph()
-#     lens["barabasi"] = len(barabasi)
+def stress_test():
+    # random removals
+    lens = {}
+    erdos = nx.erdos_renyi_graph(500, 0.1)
+    lens["erdos"] = len(erdos)
+    barabasi = nx.barabasi_albert_graph(2000, 10)
+    lens["barabasi"] = len(barabasi)
 
-#     giant_sizes = {}
-#     while (len(erdos) > 0):
-#         # remove vertex
-#         giant_sizes["erdos"].append(len(giant_component(erdos)))
+    giant_sizes = {}
+    giant_sizes["erdos"] = []
+    giant_sizes["barabasi"] = []
 
-#     while (len(barabasi) > 0):
-#         # remove vertex
-#         giant_sizes["barabasi"].append(len(giant_component(barabasi)))
+    while (len(erdos) > 1):
+        erdos.remove_node(erdos.nodes()[random.randint(0,len(erdos)-1)])
+        giant_sizes["erdos"].append(len(giant_component(erdos)))
 
-#     # plot stress test
-#     sns.set()
-#     pp.plot(lens["erdos"], giants_sizes["erdos"].values(), color=colors[0])
-#     pp.xlabel("Number of removals")
-#     pp.ylabel("Size of giant component")
-#     pp.grid(False)
-#     pp.savefig('plots/ER-stress-test.png')
-#     pp.clf()
+    while (len(barabasi) > 1):
+        # remove vertex
+        barabasi.remove_node(barabasi.nodes()[random.randint(0,len(barabasi)-1)])
+        giant_sizes["barabasi"].append(len(giant_component(barabasi)))
 
-#     sns.set()
-#     pp.plot(lens["barabasi"], giants_sizes["barabasi"].values(), color=colors[0])
-#     pp.xlabel("Number of removals")
-#     pp.ylabel("Size of giant component")
-#     pp.grid(False)
-#     pp.savefig('plots/BA-stress-test.png')
-#     pp.clf()
+    # plot stress test
+    sns.set()
+    pp.plot(lens["erdos"], giant_sizes["erdos"], color=colors[0])
+    pp.xlabel("Number of removals")
+    pp.ylabel("Size of giant component")
+    pp.grid(False)
+    pp.savefig('plots/ER-stress-test-random.png')
+    pp.clf()
 
-#     # remove from most connected to least connected
-#     lens.clear()
-#     erdos = nx.erdos_renyi_graph()
-#     lens["erdos"] = len(erdos)
-#     barabasi = nx.barabasi_albert_graph()
-#     lens["barabasi"] = len(barabasi)
+    sns.set()
+    pp.plot(lens["barabasi"], giant_sizes["barabasi"], color=colors[0])
+    pp.xlabel("Number of removals")
+    pp.ylabel("Size of giant component")
+    pp.grid(False)
+    pp.savefig('plots/BA-stress-test-random.png')
+    pp.clf()
 
-#     giant_sizes.clear()
-#     while (len(erdos) > 0):
-#         # remove vertex
-#         giant_sizes["erdos"].append(len(giant_component(erdos)))
+    # remove from most connected to least connected
+    lens.clear()
+    erdos = nx.erdos_renyi_graph(500, 0.1)
+    lens["erdos"] = len(erdos)
+    barabasi = nx.barabasi_albert_graph(2000, 10)
+    lens["barabasi"] = len(barabasi)
 
-#     while (len(barabasi) > 0):
-#         # remove vertex
-#         giant_sizes["barabasi"].append(len(giant_component(barabasi)))
+    erdos_sorted = sorted(erdos.degree_iter(),key=itemgetter(1),reverse=True)
+    barabasi_nodes = sorted(erdos.degree_iter(),key=itemgetter(1),reverse=True)
 
-#     # plot stress test
-#     sns.set()
-#     pp.plot(lens["erdos"], giants_sizes["erdos"].values(), color=colors[0])
-#     pp.xlabel("Number of removals")
-#     pp.ylabel("Size of giant component")
-#     pp.grid(False)
-#     pp.savefig('plots/ER-stress-test.png')
-#     pp.clf()
+    giant_sizes.clear()
+    giant_sizes["erdos"] = []
+    giant_sizes["barabasi"] = []
+    
+    i = 0
+    while (len(erdos) > 1):
+        # remove vertex
+        erdos.remove_node(erdos_sorted[i])
+        giant_sizes["erdos"].append(len(giant_component(erdos)))
+        i += 1
 
-#     sns.set()
-#     pp.plot(lens["barabasi"], giants_sizes["barabasi"].values(), color=colors[0])
-#     pp.xlabel("Number of removals")
-#     pp.ylabel("Size of giant component")
-#     pp.grid(False)
-#     pp.savefig('plots/BA-stress-test.png')
-#     pp.clf()
+    i = 0
+    while (len(barabasi) > 1):
+        # remove vertex
+        barabasi.remove_node(barabasi_sorted[i])
+        giant_sizes["barabasi"].append(len(giant_component(barabasi)))
+        i += 1
+
+    # plot stress test
+    sns.set()
+    pp.plot(lens["erdos"], giant_sizes["erdos"], color=colors[0])
+    pp.xlabel("Number of removals")
+    pp.ylabel("Size of giant component")
+    pp.grid(False)
+    pp.savefig('plots/ER-stress-test-sorted.png')
+    pp.clf()
+
+    sns.set()
+    pp.plot(lens["barabasi"], giant_sizes["barabasi"], color=colors[0])
+    pp.xlabel("Number of removals")
+    pp.ylabel("Size of giant component")
+    pp.grid(False)
+    pp.savefig('plots/BA-stress-test-sorted.png')
+    pp.clf()
 
 
 def main():
-    # network_models()
-    # ER_model()
-    # WS_model()
+    network_models()
+    ER_model()
+    WS_model()
     BA_model()
+    stress_test()
     print("done")
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 #!/bin/usr/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Dynamical Processes in Complex Networks
 University of Sao Paulo
 Professor Francisco Aparecido Rodrigues
@@ -12,7 +12,7 @@ Gabriel Henrique Scalici - 9292970
 
 
 Assignment 2 - Correlation and Communities
-'''
+"""
 
 import networkx as nx
 import igraph as ig
@@ -29,6 +29,7 @@ from sklearn.metrics import normalized_mutual_info_score
 # plot colors
 colors = ["#1abc9c", "#2ecc71", "#3498db", "#f1c40f", "#e67e22", "#e74c3c", "#2c3e50"]
 
+
 def pearson(x, y):
     n = len(x)
     sum_x = float(sum(x))
@@ -36,7 +37,7 @@ def pearson(x, y):
     sum_x_sq = sum(map(lambda x: pow(x, 2), x))
     sum_y_sq = sum(map(lambda x: pow(x, 2), y))
     psum = sum(map(lambda x, y: x * y, x, y))
-    num = psum - (sum_x * sum_y/n)
+    num = psum - (sum_x * sum_y / n)
     den = pow((sum_x_sq - pow(sum_x, 2) / n) * (sum_y_sq - pow(sum_y, 2) / n), 0.5)
     if den == 0: return 0
     return num / den
@@ -63,7 +64,7 @@ def nx_to_ig(graph):
 
 def assortativity(graphs):
     print("ASSORTATIVITY")
-    for name,graph in graphs.items():
+    for name, graph in graphs.items():
         assortativity = nx.degree_assortativity_coefficient(graph)
         print("%s: %.4f" % (name, assortativity))
 
@@ -86,19 +87,19 @@ def k_x_knn(graphs):
         ax2 = fig.add_subplot(111, label="knn(k)", frame_on=False)
 
         # knn(x) - scatter
-        plot1 = ax1.scatter(degrees, knn_vertex, s = 10, color=colors[i], marker='o', label="k(x) x knn(x)")
+        plot1 = ax1.scatter(degrees, knn_vertex, s=10, color=colors[i], marker='o', label="k(x) x knn(x)")
         ax1.set_xlabel("k(x)")
         ax1.set_ylabel("knn(x)")
         ax1.tick_params(axis='x')
         ax1.tick_params(axis='y')
         # knn(k) - line
-        plot2, = ax2.plot(k, knn_degrees, c=colors[i+1], label="knn(k)")
+        plot2, = ax2.plot(k, knn_degrees, c=colors[i + 1], label="knn(k)")
         ax2.xaxis.tick_top()
         ax2.yaxis.tick_right()
         ax2.set_xlabel("k")
         ax2.set_ylabel("knn(k)")
-        ax2.xaxis.set_label_position('top') 
-        ax2.yaxis.set_label_position('right')   
+        ax2.xaxis.set_label_position('top')
+        ax2.yaxis.set_label_position('right')
         ax2.tick_params(axis='x')
         ax2.tick_params(axis='y')
 
@@ -108,8 +109,8 @@ def k_x_knn(graphs):
         fig.subplots_adjust(top=0.85, bottom=0.15)
         pp.suptitle("k x knn - %s" % name)
         pp.grid(False)
-        
-        pp.savefig('plots/' + name + "-kxknn.png",bbox_inches = 'tight')
+
+        pp.savefig('plots/' + name + "-kxknn.png", bbox_inches='tight')
         pp.clf()
         i += 1
 
@@ -143,30 +144,29 @@ def modularities(graphs):
 def plot_modularity_evolution(graphs):
     for name, graph in graphs.items():
         print(name)
-        #convert
+        # convert
         g = nx_to_ig(graph)
 
-        #fast-greedy
+        # fast-greedy
         evolution = g.community_fastgreedy()
         count = evolution.optimal_count
 
-        #aux
+        # aux
         count = count - 1
         tam = len(g.vs)
 
-        #axis
+        # axis
         value_x = range(tam, count, -1)
         value_y = np.zeros(len(value_x))
 
-
         list_values_y = range(len(value_y))
         for i in list_values_y:
-            value_y[i] = evolution.as_clustering(n = value_x[i]).modularity
+            value_y[i] = evolution.as_clustering(n=value_x[i]).modularity
 
-        #reverse
+        # reverse
         value_x = value_x[::-1]
 
-        #plot
+        # plot
         sns.set()
         pp.plot(value_x, value_y, color=colors[0], marker='o')
         pp.title("Modularity Evolution - " + name)
@@ -205,7 +205,7 @@ def communities():
         memberships = []
         mems = open('./community.dat')
         for line in mems:
-            memberships.append(int(line.split()[1])) # append community id
+            memberships.append(int(line.split()[1]))  # append community id
 
         # apply detection algorithms and get new memberships vectors
         detection_edge_bet = g.community_edge_betweenness(directed=False).as_clustering().membership
@@ -235,6 +235,7 @@ def communities():
 
     pp.savefig('plots/nmi.png')
 
+
 # read networks
 graphs = {}
 graphs["Euroroad"] = read_graph("./networks/euroroad.txt")
@@ -249,7 +250,7 @@ assortativity(graphs)
 # 2
 k_x_knn(graphs)
 # 3, 6
-modularities(graphs)
+# modularities(graphs)
 # 5
 plot_modularity_evolution(graphs)
 # 7

@@ -11,7 +11,7 @@ Felipe Scrochio Custódio - 9442688
 Gabriel Henrique Scalici - 9292970
 
 
-Assignment 4 - 
+Assignment 4 - Epidemics and Rumors
 '''
 
 import networkx as nx
@@ -33,7 +33,14 @@ def nx_to_ig(graph):
     g = ig.Graph.TupleList(graph.edges(), directed=False)
     return g
 
-# assignment functions
+# 1
+
+# 2
+
+# 3
+
+# 4
+
 
 def main():
     print("done")
